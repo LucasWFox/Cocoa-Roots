@@ -6,6 +6,15 @@ ingredients = []
 batches = []
 tickets = []
 
+red = "#b3152a"
+orange = "#F6A482"
+dark_orange = "#ed652d"
+light_orange = "#FEDBC7"
+light_blue = "#D1E5F0"
+dark_blue = "#8EC4DE"
+
+
+
 
 class Ingredient:
     def __init__(self, name, weight, source):
@@ -151,13 +160,16 @@ def load():
 
 window = tk.Tk()
 
-title = tk.Label(height=3, bg="#b3152a")
+title = tk.Label(height=4, bg=orange)
 title.grid(row=0, column=0, sticky="ew")
 window.grid_columnconfigure(0, weight=1)
 
-content = tk.Label(bg="#D1E5F0")
+content = tk.Label(bg="#f5f0ed")
 content.grid(row=1, column=0, sticky="nsew")
 window.grid_rowconfigure(1, weight=1)
+
+item = tk.Label(content, bg=light_blue)
+item.pack()
 
 
 
