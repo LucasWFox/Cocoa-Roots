@@ -171,18 +171,27 @@ def load():
 
 # main tkinter setup
 window = tk.Tk()
+window.geometry("500x600")  # window dimensions
 
 # titlebar
-title = tk.Label(height=4, bg=ORANGE)
-title.grid(row=0, column=0, sticky="ew")
-window.grid_columnconfigure(0, weight=1)
+title_bar = tk.Label(height=4, bg=ORANGE)
+title_bar.grid(row=0, column=0, sticky="ew")
+window.grid_columnconfigure(0, weight=1)  # make expandable with screen
+
+logo = tk.PhotoImage(file="Content/Bean_Logo.png")
+logo_label = tk.Label(title_bar, image=logo, bg=ORANGE)
+logo_label.pack(side=tk.LEFT)
+
+title_text = tk.Label(title_bar, text="Cocoa Roots", font=("Bernard MT Condensed", 25), bg=ORANGE)
+title_text.pack(side=tk.LEFT)
+
 
 # background
-content = tk.Label(bg="#f5f0ed")
+content = tk.Label(bg=BACKGROUND)
 content.grid(row=1, column=0, sticky="nsew")
-window.grid_rowconfigure(1, weight=1)
+window.grid_rowconfigure(1, weight=1)  # make expandable with screen
 
-item = tk.Label(content, bg=LIGHT_BLUE)
+item = tk.Label(content, bg=DARK_BLUE)
 item.pack()
 
 window.mainloop()
