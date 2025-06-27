@@ -16,6 +16,7 @@ LIGHT_ORANGE = "#FEDBC7"
 LIGHT_BLUE = "#D1E5F0"
 DARK_BLUE = "#8EC4DE"
 BACKGROUND = "#f5f0ed"
+ERROR_GREEN = "#46f274"  # This colour should only be on hidden elements
 
 
 # -----------------------------------------------------------------------------
@@ -192,6 +193,8 @@ title_text.pack(side=tk.LEFT)
 class Content(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self, bg=BACKGROUND, height=20, borderwidth=1, relief="solid")
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(1, weight=1)
 
         self.pages = {}  # dictionary of sub-frames within content
 
@@ -210,8 +213,12 @@ class Content(tk.Frame):
 
 class UserPage(tk.Frame):
     def __init__(self, parent):
-        tk.Frame.__init__(self, parent, bg=LIGHT_BLUE, height=20, borderwidth=1, relief="solid")
+        tk.Frame.__init__(self, parent, bg=BACKGROUND, height=20, borderwidth=1, relief="solid")
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_columnconfigure(1, weight=1)
 
+        worker_button = tk.Button(self, text="worker")
+        worker_button.grid(row=1, column=1)
 
 content = Content()
 content.grid(row=2, column=1, sticky="nsew")
