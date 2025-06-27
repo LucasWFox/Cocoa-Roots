@@ -215,10 +215,29 @@ class UserPage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, bg=BACKGROUND, height=20, borderwidth=1, relief="solid")
         self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
-        worker_button = tk.Button(self, text="worker")
+        worker_button = tk.Button(self,
+                                  text="Worker",
+                                  bg=LIGHT_BLUE,
+                                  height=7,
+                                  width=30,
+                                  borderwidth=1,
+                                  relief="solid"
+                                  )
         worker_button.grid(row=1, column=1)
+
+        consumer_button = tk.Button(self,
+                                    text="Consumer",
+                                    bg=LIGHT_BLUE,
+                                    height=7,
+                                    width=30,
+                                    borderwidth=1,
+                                    relief="solid"
+                                    )
+        consumer_button.grid(row=2, column=1)
+
 
 content = Content()
 content.grid(row=2, column=1, sticky="nsew")
