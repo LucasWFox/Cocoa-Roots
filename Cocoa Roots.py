@@ -198,7 +198,7 @@ class Content(tk.Frame):
 
         self.pages = {}  # dictionary of sub-frames within content
 
-        for page in [UserPage, WorkerPage]:  # for every page within content
+        for page in [UserPage, WorkerPage, ConsumerPage]:  # for every page within content
             page_class = page(parent=self)  # create frame class
 
             self.pages[page] = page_class
@@ -236,7 +236,8 @@ class UserPage(tk.Frame):
                                     height=7,
                                     width=30,
                                     borderwidth=1,
-                                    relief="solid"
+                                    relief="solid",
+                                    command=lambda: parent.switch_page(ConsumerPage)
                                     )
         consumer_button.grid(row=2, column=1)
 
@@ -244,6 +245,11 @@ class UserPage(tk.Frame):
 class WorkerPage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, bg=ERROR_GREEN, height=20, borderwidth=1, relief="solid")
+
+
+class ConsumerPage(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent, bg=ORANGE, height=20, borderwidth=1, relief="solid")
 
 
 
