@@ -174,12 +174,12 @@ window = tk.Tk()
 window.config(bg="blue")
 window.geometry("500x600")  # window dimensions
 window.title("Cocoa Roots")
-window.grid_columnconfigure(0, weight=1)  # make expandable with screen
-window.grid_rowconfigure(1, weight=1)
+window.grid_columnconfigure(1, weight=1)  # make expandable with screen
+window.grid_rowconfigure(2, weight=1)
 
 # titlebar
-title_bar = tk.Label(height=4, bg=ORANGE)
-title_bar.grid(row=0, column=0, sticky="ew")
+title_bar = tk.Frame(height=4, bg=ORANGE)
+title_bar.grid(row=1, column=1, sticky="ew")
 
 logo = tk.PhotoImage(file="Content/Bean_Logo.png")
 logo_label = tk.Label(title_bar, image=logo, bg=ORANGE)
@@ -193,10 +193,27 @@ class Content(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self, bg=BACKGROUND, height=20, borderwidth=1, relief="solid")
 
-        self.pages = {}
+        self.pages = {}  # dictionary of sub-frames within content
+
+        for page in [UserPage]:  # for every page within content
+            page_class = page(parent=self)  # create frame class
+            page_class.grid(row=1, column=1, sticky="nsew")
+            
+            self.pages[page] = page_class
+
+        self.switch_page(UserPage)
+
+    def switch_page(self, page_name):
+        page = self.pages[page_name]
+        page.tkraise()
+
+
+class UserPage(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent, bg=LIGHT_BLUE, height=20, borderwidth=1, relief="solid")
 
 
 content = Content()
-content.grid(row=1, column=0, sticky="nsew")
+content.grid(row=2, column=1, sticky="nsew")
 
 window.mainloop()
