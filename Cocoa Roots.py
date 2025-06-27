@@ -182,7 +182,7 @@ window.grid_rowconfigure(2, weight=1)
 title_bar = tk.Frame(height=4, bg=ORANGE)
 title_bar.grid(row=1, column=1, sticky="ew")
 
-logo = tk.PhotoImage(file="Content/Bean_Logo.png")
+logo = tk.PhotoImage(file="Resources/Bean_Logo.png")
 logo_label = tk.Label(title_bar, image=logo, bg=ORANGE)
 logo_label.pack(side=tk.LEFT)
 
@@ -198,11 +198,12 @@ class Content(tk.Frame):
 
         self.pages = {}  # dictionary of sub-frames within content
 
-        for page in [UserPage]:  # for every page within content
+        for page in [UserPage, WorkerPage]:  # for every page within content
             page_class = page(parent=self)  # create frame class
-            page_class.grid(row=1, column=1, sticky="nsew")
-            
+
             self.pages[page] = page_class
+
+            page_class.grid(row=1, column=1, sticky="nsew")
 
         self.switch_page(UserPage)
 
@@ -224,7 +225,8 @@ class UserPage(tk.Frame):
                                   height=7,
                                   width=30,
                                   borderwidth=1,
-                                  relief="solid"
+                                  relief="solid",
+                                  command=lambda: parent.switch_page(WorkerPage)
                                   )
         worker_button.grid(row=1, column=1)
 
@@ -237,6 +239,13 @@ class UserPage(tk.Frame):
                                     relief="solid"
                                     )
         consumer_button.grid(row=2, column=1)
+
+
+class WorkerPage(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent, bg=ERROR_GREEN, height=20, borderwidth=1, relief="solid")
+
+
 
 
 content = Content()
