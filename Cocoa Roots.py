@@ -195,7 +195,6 @@ class Content(tk.Frame):
         tk.Frame.__init__(self, bg=BACKGROUND, height=20, borderwidth=1, relief="solid")
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(1, weight=1)
-        self.current_page = ""
 
         self.back_track = {}
         self.back_button = tk.Button(title_bar,
@@ -205,7 +204,7 @@ class Content(tk.Frame):
                                      bg=LIGHT_ORANGE,
                                      borderwidth=1,
                                      relief="solid",
-                                     command=lambda: self.switch_page(self.back_button[self.current_page])
+                                     command=lambda: self.go_back()
                                      )
         self.back_button.pack(padx=10, side=tk.RIGHT)
 
@@ -218,11 +217,18 @@ class Content(tk.Frame):
 
             page_class.grid(row=1, column=1, sticky="nsew")
 
-        self.switch_page(UserPage)
+        self.current_page = UserPage
+        self.navigate(UserPage)
+
+    def navigate(self, page_name):
+        self.back_track[page_name] = self.current_page
+        self.switch_page(page_name)
+
+    def go_back(self):
+        last_page = self.back_track[self.current_page]
+        self.switch_page(last_page)
 
     def switch_page(self, page_name):
-        self.back_track[self.current_page] = page_name
-
         self.current_page = page_name
         page = self.pages[page_name]
         page.tkraise()
@@ -242,7 +248,7 @@ class UserPage(tk.Frame):
                                   width=30,
                                   borderwidth=1,
                                   relief="solid",
-                                  command=lambda: parent.switch_page(WorkerPage)
+                                  command=lambda: parent.navigate(WorkerPage)
                                   )
         worker_button.grid(row=1, column=1)
 
@@ -253,7 +259,7 @@ class UserPage(tk.Frame):
                                     width=30,
                                     borderwidth=1,
                                     relief="solid",
-                                    command=lambda: parent.switch_page(ConsumerPage)
+                                    command=lambda: parent.navigate(ConsumerPage)
                                     )
         consumer_button.grid(row=2, column=1)
 
@@ -261,15 +267,13 @@ class UserPage(tk.Frame):
 class WorkerPage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, bg=ERROR_GREEN, height=20, borderwidth=1, relief="solid")
-
-        # parent.back_button.pack(padx=10, side=tk.RIGHT)
+        self.page_name = "WorkerPage"
 
 
 class ConsumerPage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, bg=ORANGE, height=20, borderwidth=1, relief="solid")
-
-        # parent
+        self.page_name = "ConsumerPage"
 
 
 content = Content()
