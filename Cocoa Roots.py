@@ -195,6 +195,19 @@ class Content(tk.Frame):
         tk.Frame.__init__(self, bg=BACKGROUND, height=20, borderwidth=1, relief="solid")
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(1, weight=1)
+        self.current_page = ""
+
+        self.back_track = {}
+        self.back_button = tk.Button(title_bar,
+                                     text="<",
+                                     width=7,
+                                     height=2,
+                                     bg=LIGHT_ORANGE,
+                                     borderwidth=1,
+                                     relief="solid",
+                                     command=lambda: self.switch_page(self.back_button[self.current_page])
+                                     )
+        self.back_button.pack(padx=10, side=tk.RIGHT)
 
         self.pages = {}  # dictionary of sub-frames within content
 
@@ -208,6 +221,9 @@ class Content(tk.Frame):
         self.switch_page(UserPage)
 
     def switch_page(self, page_name):
+        self.back_track[self.current_page] = page_name
+
+        self.current_page = page_name
         page = self.pages[page_name]
         page.tkraise()
 
@@ -246,12 +262,14 @@ class WorkerPage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, bg=ERROR_GREEN, height=20, borderwidth=1, relief="solid")
 
+        # parent.back_button.pack(padx=10, side=tk.RIGHT)
+
 
 class ConsumerPage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, bg=ORANGE, height=20, borderwidth=1, relief="solid")
 
-
+        # parent
 
 
 content = Content()
