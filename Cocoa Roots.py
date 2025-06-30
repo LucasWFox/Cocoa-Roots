@@ -206,7 +206,6 @@ class Content(tk.Frame):
                                      relief="solid",
                                      command=lambda: self.go_back()
                                      )
-        self.back_button.pack(padx=10, side=tk.RIGHT)
 
         self.pages = {}  # dictionary of sub-frames within content
 
@@ -218,7 +217,7 @@ class Content(tk.Frame):
             page_class.grid(row=1, column=1, sticky="nsew")
 
         self.current_page = UserPage
-        self.navigate(UserPage)
+        self.switch_page(UserPage)
 
     def navigate(self, page_name):
         self.back_track[page_name] = self.current_page
@@ -229,6 +228,11 @@ class Content(tk.Frame):
         self.switch_page(last_page)
 
     def switch_page(self, page_name):
+        if page_name in self.back_track:
+            self.back_button.pack(padx=10, side=tk.RIGHT)
+        else:
+            self.back_button.pack_forget()
+
         self.current_page = page_name
         page = self.pages[page_name]
         page.tkraise()
