@@ -286,13 +286,19 @@ class ConsumerPage(tk.Frame):
                               bg=LIGHT_BLUE,
                               borderwidth=1,
                               relief="solid",
-                              width=50,
                               font=("Calabi", 12)
                               )
-        search_bar.grid(row=1, column=1, pady=20, ipady=3)
+        search_bar.grid(row=1, column=1, pady=20, ipady=3, padx=20, sticky="we")
 
-        search_button = tk.Button(self, image=search_icon, bg=LIGHT_BLUE, command=lambda: parent.switch_page(UserPage))
-        search_button.grid(row=1, column=2, pady=20, ipady=3)
+        search_button = tk.Button(self,
+                                  image=search_icon,
+                                  bg=LIGHT_BLUE,
+                                  height=25,
+                                  command=lambda: parent.switch_page(UserPage)
+                                  )
+        window.update_idletasks()
+        print(search_button.winfo_width())
+        search_button.grid(row=1, column=2, padx=20, ipady=3)
 
 
 content = Content()
