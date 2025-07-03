@@ -180,8 +180,8 @@ window.grid_columnconfigure(1, weight=1)  # make expandable with screen
 window.grid_rowconfigure(2, weight=1)
 
 # Images
-search_icon = ImageTk.PhotoImage(Image.open("Resources/Search_entry.png").resize((30,30)))
-logo = tk.PhotoImage(file="Resources/Bean_Logo.png")
+search_icon = ImageTk.PhotoImage(Image.open("Resources/Search_entry.png").resize((30, 30)))
+logo = ImageTk.PhotoImage(Image.open("Resources/Bean_Logo.png"))
 
 # titlebar
 title_bar = tk.Frame(height=4, bg=ORANGE)
