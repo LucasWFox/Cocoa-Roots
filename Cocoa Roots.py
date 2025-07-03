@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import pickle
+from PIL import Image, ImageTk
 
 # lists of classes and objects
 # these lists are global
@@ -178,11 +179,14 @@ window.title("Cocoa Roots")
 window.grid_columnconfigure(1, weight=1)  # make expandable with screen
 window.grid_rowconfigure(2, weight=1)
 
+# Images
+search_icon = ImageTk.PhotoImage(Image.open("Resources/Search_entry.png").resize((30,30)))
+logo = tk.PhotoImage(file="Resources/Bean_Logo.png")
+
 # titlebar
 title_bar = tk.Frame(height=4, bg=ORANGE)
 title_bar.grid(row=1, column=1, sticky="ew")
 
-logo = tk.PhotoImage(file="Resources/Bean_Logo.png")
 logo_label = tk.Label(title_bar, image=logo, bg=ORANGE)
 logo_label.pack(side=tk.LEFT)
 
@@ -271,13 +275,24 @@ class UserPage(tk.Frame):
 class WorkerPage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, bg=ERROR_GREEN, height=20, borderwidth=1, relief="solid")
-        self.page_name = "WorkerPage"
 
 
 class ConsumerPage(tk.Frame):
     def __init__(self, parent):
-        tk.Frame.__init__(self, parent, bg=ORANGE, height=20, borderwidth=1, relief="solid")
-        self.page_name = "ConsumerPage"
+        tk.Frame.__init__(self, parent, bg=BACKGROUND, height=20, borderwidth=1, relief="solid")
+        self.grid_columnconfigure(1, weight=1)
+
+        search_bar = tk.Entry(self,
+                              bg=LIGHT_BLUE,
+                              borderwidth=1,
+                              relief="solid",
+                              width=50,
+                              font=("Calabi", 12)
+                              )
+        search_bar.grid(row=1, column=1, pady=20, ipady=3)
+
+        search_button = tk.Button(self, image=search_icon, bg=LIGHT_BLUE, command=lambda: parent.switch_page(UserPage))
+        search_button.grid(row=1, column=2, pady=20, ipady=3)
 
 
 content = Content()
