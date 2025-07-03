@@ -279,26 +279,31 @@ class WorkerPage(tk.Frame):
 
 class ConsumerPage(tk.Frame):
     def __init__(self, parent):
-        tk.Frame.__init__(self, parent, bg=BACKGROUND, height=20, borderwidth=1, relief="solid")
+        tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
         self.grid_columnconfigure(1, weight=1)
 
-        search_bar = tk.Entry(self,
-                              bg=LIGHT_BLUE,
+        search_background = tk.Frame(self, bg=LIGHT_ORANGE, borderwidth=1, relief="solid",)
+        search_background.grid(row=1, column=1, pady=20, ipady=5, padx=20, sticky="we")
+        search_background.grid_columnconfigure(1, weight=1)
+
+        search_bar = tk.Entry(search_background,
                               borderwidth=1,
                               relief="solid",
                               font=("Calabi", 12)
                               )
-        search_bar.grid(row=1, column=1, pady=20, ipady=3, padx=20, sticky="we")
+        search_bar.grid(row=1, column=1, pady=(10, 0), ipady=7, padx=20, sticky="we")
 
-        search_button = tk.Button(self,
+        search_button = tk.Button(search_background,
                                   image=search_icon,
-                                  bg=LIGHT_BLUE,
+                                  bg=LIGHT_ORANGE,
                                   height=25,
+                                  borderwidth=1,
+                                  relief="solid",
                                   command=lambda: parent.switch_page(UserPage)
                                   )
         window.update_idletasks()
         print(search_button.winfo_width())
-        search_button.grid(row=1, column=2, padx=20, ipady=3)
+        search_button.grid(row=1, column=2, padx=(0, 20), pady=(10, 0), ipady=3)
 
 
 content = Content()
