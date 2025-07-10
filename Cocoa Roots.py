@@ -280,6 +280,7 @@ class WorkerPage(tk.Frame):
 
         self.grid_columnconfigure(1, weight=1)
 
+        # __________ Ingredient Frame __________
         ingredient_frame = tk.Frame(self,
                                     bg=LIGHT_BLUE,
                                     height=50,
@@ -307,6 +308,35 @@ class WorkerPage(tk.Frame):
                                       command=self.add_ingredient
                                       )
         ingredient_button.grid(row=1, column=2, sticky="e", padx=5)
+
+        # __________ Batches Frame __________
+        batches_frame = tk.Frame(self,
+                                 bg=LIGHT_BLUE,
+                                 height=50,
+                                 width=50,
+                                 borderwidth=1,
+                                 relief="solid"
+                                 )
+        batches_frame.grid(row=2, column=1, padx=15, sticky="nwe")
+
+        batches_frame.grid_propagate(False)
+        batches_frame.rowconfigure(1, weight=1)
+        batches_frame.columnconfigure(1, weight=1)
+
+        batches_label = tk.Label(batches_frame,
+                                 bg=LIGHT_BLUE,
+                                 text="Add Batch"
+                                 )
+        batches_label.grid(row=1, column=1, sticky="w", padx=5)
+
+        batches_button = tk.Button(batches_frame,
+                                   bg=LIGHT_ORANGE,
+                                   text="+",
+                                   font=("Calabi", 12),
+                                   padx=5,
+                                   command=self.add_ingredient
+                                   )
+        batches_button.grid(row=1, column=2, sticky="e", padx=5)
 
     def add_ingredient(self):
         print("hello", self.info)
