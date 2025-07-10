@@ -303,9 +303,13 @@ class WorkerPage(tk.Frame):
                                       bg=LIGHT_ORANGE,
                                       text="+",
                                       font=("Calabi", 12),
-                                      padx=5
+                                      padx=5,
+                                      command=self.add_ingredient
                                       )
         ingredient_button.grid(row=1, column=2, sticky="e", padx=5)
+
+    def add_ingredient(self):
+        print("hello", self.info)
 
 
 class ConsumerPage(tk.Frame):
@@ -330,9 +334,12 @@ class ConsumerPage(tk.Frame):
                                   height=25,
                                   borderwidth=1,
                                   relief="ridge",
-                                  command=lambda: parent.switch_page(UserPage)
+                                  command=self.search
                                   )
         search_button.grid(row=1, column=2, padx=(0, 20), pady=(10, 0), ipady=3)
+
+    def search(self):
+        print("search", self.info)
 
 
 content = Content()
