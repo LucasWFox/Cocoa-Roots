@@ -174,7 +174,7 @@ def load():
 # main tkinter setup
 window = tk.Tk()
 window.config(bg="blue")
-window.geometry("500x600")  # window dimensions
+window.geometry("400x600")  # window dimensions
 window.title("Cocoa Roots")
 window.grid_columnconfigure(1, weight=1)  # make expandable with screen
 window.grid_rowconfigure(2, weight=1)
@@ -280,16 +280,32 @@ class WorkerPage(tk.Frame):
 
         self.grid_columnconfigure(1, weight=1)
 
-        add_ingredient = tk.Label(self,
-                                  bg=LIGHT_BLUE,
-                                  text="  Add Ingredient",
-                                  height=4,
-                                  width=50,
-                                  borderwidth=1,
-                                  relief="solid",
-                                  anchor="w"
-                                  )
-        add_ingredient.grid(row=1, column=1)
+        ingredient_frame = tk.Frame(self,
+                                    bg=LIGHT_BLUE,
+                                    height=50,
+                                    width=50,
+                                    borderwidth=1,
+                                    relief="solid"
+                                    )
+        ingredient_frame.grid(row=1, column=1, padx=15, sticky="we")
+
+        ingredient_frame.grid_propagate(False)
+        ingredient_frame.rowconfigure(1, weight=1)
+        ingredient_frame.columnconfigure(1, weight=1)
+
+        ingredient_label = tk.Label(ingredient_frame,
+                                    bg=LIGHT_BLUE,
+                                    text="Add Ingredient"
+                                    )
+        ingredient_label.grid(row=1, column=1, sticky="w", padx=5)
+
+        ingredient_button = tk.Button(ingredient_frame,
+                                      bg=LIGHT_ORANGE,
+                                      text="+",
+                                      font=("Calabi", 12),
+                                      padx=5
+                                      )
+        ingredient_button.grid(row=1, column=2, sticky="e", padx=5)
 
 
 class ConsumerPage(tk.Frame):
