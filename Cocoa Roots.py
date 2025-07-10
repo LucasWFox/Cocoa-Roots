@@ -274,7 +274,22 @@ class UserPage(tk.Frame):
 
 class WorkerPage(tk.Frame):
     def __init__(self, parent):
-        tk.Frame.__init__(self, parent, bg=ERROR_GREEN, height=20, borderwidth=1, relief="solid")
+        tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=4)
+
+        self.grid_columnconfigure(1, weight=1)
+
+        add_ingredient = tk.Label(self,
+                                  bg=LIGHT_BLUE,
+                                  text="  Add Ingredient",
+                                  height=4,
+                                  width=50,
+                                  borderwidth=1,
+                                  relief="solid",
+                                  anchor="w"
+                                  )
+        add_ingredient.grid(row=1, column=1)
 
 
 class ConsumerPage(tk.Frame):
@@ -282,8 +297,8 @@ class ConsumerPage(tk.Frame):
         tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
         self.grid_columnconfigure(1, weight=1)
 
-        search_background = tk.Frame(self, bg=LIGHT_ORANGE, borderwidth=1, relief="solid",)
-        search_background.grid(row=1, column=1, pady=20, ipady=5, padx=20, sticky="we")
+        search_background = tk.Frame(self, bg=LIGHT_ORANGE, borderwidth=1, relief="solid")
+        search_background.grid(row=1, column=1, pady=20, ipady=5, padx=(15, 50), sticky="we")
         search_background.grid_columnconfigure(1, weight=1)
 
         search_bar = tk.Entry(search_background,
@@ -298,11 +313,9 @@ class ConsumerPage(tk.Frame):
                                   bg=LIGHT_ORANGE,
                                   height=25,
                                   borderwidth=1,
-                                  relief="solid",
+                                  relief="ridge",
                                   command=lambda: parent.switch_page(UserPage)
                                   )
-        window.update_idletasks()
-        print(search_button.winfo_width())
         search_button.grid(row=1, column=2, padx=(0, 20), pady=(10, 0), ipady=3)
 
 
