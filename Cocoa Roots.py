@@ -213,7 +213,7 @@ class Content(tk.Frame):
 
         self.pages = {}  # dictionary of sub-frames within content
 
-        for page in [UserPage, WorkerPage, ConsumerPage]:  # for every page within content
+        for page in [UserPage, WorkerPage, ConsumerPage, IngredientPage]:  # for every page within content
             page_class = page(parent=self)  # create frame class
 
             self.pages[page] = page_class
@@ -305,7 +305,7 @@ class WorkerPage(tk.Frame):
                                       text="+",
                                       font=("Calabi", 12),
                                       padx=5,
-                                      command=self.add_ingredient
+                                      command=lambda: parent.navigate(IngredientPage)
                                       )
         ingredient_button.grid(row=1, column=2, sticky="e", padx=5)
 
@@ -370,6 +370,35 @@ class ConsumerPage(tk.Frame):
 
     def search(self):
         print("search", self.info)
+
+
+class IngredientPage(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=4)
+
+        self.grid_columnconfigure(1, weight=1)
+
+        # __________ Ingredient Frame __________
+        ingredient_frame = tk.Frame(self,
+                                    bg=LIGHT_BLUE,
+                                    height=50,
+                                    width=50,
+                                    borderwidth=1,
+                                    relief="solid"
+                                    )
+        ingredient_frame.grid(row=1, column=1, padx=15, sticky="we")
+
+        ingredient_frame.grid_propagate(False)
+        ingredient_frame.rowconfigure(1, weight=1)
+        ingredient_frame.columnconfigure(1, weight=1)
+
+        ingredient_label = tk.Label(ingredient_frame,
+                                    bg=LIGHT_BLUE,
+                                    text="Add Ingredient"
+                                    )
+        ingredient_label.grid(row=1, column=1)
 
 
 content = Content()
