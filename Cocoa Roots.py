@@ -380,25 +380,41 @@ class IngredientPage(tk.Frame):
 
         self.grid_columnconfigure(1, weight=1)
 
-        # __________ Ingredient Frame __________
-        ingredient_frame = tk.Frame(self,
-                                    bg=LIGHT_BLUE,
-                                    height=50,
-                                    width=50,
-                                    borderwidth=1,
-                                    relief="solid"
-                                    )
-        ingredient_frame.grid(row=1, column=1, padx=15, sticky="we")
+        # __________ Page Title __________
+        title_frame = tk.Frame(self,
+                               bg=LIGHT_BLUE,
+                               height=50,
+                               width=50,
+                               borderwidth=1,
+                               relief="solid"
+                               )
+        title_frame.grid(row=1, column=1, padx=15, sticky="we")
 
-        ingredient_frame.grid_propagate(False)
-        ingredient_frame.rowconfigure(1, weight=1)
-        ingredient_frame.columnconfigure(1, weight=1)
+        title_frame.grid_propagate(False)
+        title_frame.rowconfigure(1, weight=1)
+        title_frame.columnconfigure(1, weight=1)
 
-        ingredient_label = tk.Label(ingredient_frame,
-                                    bg=LIGHT_BLUE,
-                                    text="Add Ingredient"
-                                    )
-        ingredient_label.grid(row=1, column=1)
+        title_label = tk.Label(title_frame,
+                               bg=LIGHT_BLUE,
+                               text="Add Ingredient"
+                               )
+        title_label.grid(row=1, column=1)
+
+        # __________ Page Content __________
+        content_frame = tk.Frame(self, width=200, height=200)
+        content_frame.grid(column=1, row=2, sticky="nesw")
+
+        content_frame.grid_propagate(False)
+        content_frame.grid_rowconfigure(1, weight=1)
+        content_frame.grid_rowconfigure(2, weight=2)
+
+        content_frame.grid_columnconfigure(2, weight=1)
+
+        name_label = tk.Label(content_frame, text="Name: ")
+        name_label.grid(column=1, row=1)
+
+        name_entry = tk.Entry(content_frame)
+        name_entry.grid(column=2, row=1, sticky="ew")
 
 
 content = Content()
