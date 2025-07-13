@@ -5,7 +5,7 @@ from PIL import Image, ImageTk
 
 # lists of classes and objects
 # these lists are global
-ingredients = []
+ingredients = {}
 batches = []
 tickets = []
 
@@ -25,9 +25,14 @@ ERROR_GREEN = "#46f274"  # This colour should only be on hidden elements
 # -----------------------------------------------------------------------------
 
 class Ingredient:
+    ID_counter = 1
+
     def __init__(self, name, weight, source):
         self.log = []  # list of every event occurred in ingredient
-        self.ID = 1  # ingredient unique identifier
+
+        self.ID = f"ING-{Ingredient.ID_counter:03d}-{name[:3].upper()}"  # ingredient unique identifier
+        Ingredient.ID_counter += 1
+
         self.name = name  # common name of batch
         self.weight = weight
         self.source = source  # name of ingredient suppler
@@ -409,20 +414,20 @@ class IngredientPage(tk.Frame):
         name_label = tk.Label(content_frame, text="Name: ")
         name_label.grid(column=1, row=1, padx=5)
 
-        name_entry = tk.Entry(content_frame)
-        name_entry.grid(column=2, row=1, pady=10, padx=10, sticky="ew")
+        self.name_entry = tk.Entry(content_frame)
+        self.name_entry.grid(column=2, row=1, pady=10, padx=10, sticky="ew")
 
         weight_label = tk.Label(content_frame, text="Weight: ")
         weight_label.grid(column=1, row=2, padx=5)
 
-        weight_entry = tk.Entry(content_frame)
-        weight_entry.grid(column=2, row=2, pady=10, padx=10, sticky="ew")
+        self.weight_entry = tk.Entry(content_frame)
+        self.weight_entry.grid(column=2, row=2, pady=10, padx=10, sticky="ew")
 
         source_label = tk.Label(content_frame, text="Source: ")
         source_label.grid(column=1, row=3, padx=10)
 
-        source_entry = tk.Entry(content_frame)
-        source_entry.grid(column=2, row=3, pady=10, padx=10, sticky="ew")
+        self.source_entry = tk.Entry(content_frame)
+        self.source_entry.grid(column=2, row=3, pady=10, padx=10, sticky="ew")
 
         back_button = tk.Button(content_frame,
                                 text="Submit",
@@ -430,9 +435,22 @@ class IngredientPage(tk.Frame):
                                 height=2,
                                 bg=LIGHT_ORANGE,
                                 borderwidth=1,
-                                relief="solid"
+                                relief="solid",
+                                command=self.submit
                                 )
         back_button.grid(column=1, row=4, pady=20, padx=10)
+
+    def submit(self):
+        name = self.name_entry.get()
+        weight = self.weight_entry.get()
+        source = self.source_entry.get()
+
+        instance = Ingredient(name, weight, source)
+        instance_ID = instance.ID
+
+        ingredients[instance_ID] = instance
+
+        print(ingredients)
 
 
 content = Content()
