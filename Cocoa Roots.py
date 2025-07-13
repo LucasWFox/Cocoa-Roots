@@ -404,17 +404,35 @@ class IngredientPage(tk.Frame):
         content_frame = tk.Frame(self, width=200, height=200)
         content_frame.grid(column=1, row=2, sticky="nesw")
 
-        content_frame.grid_propagate(False)
-        content_frame.grid_rowconfigure(1, weight=1)
-        content_frame.grid_rowconfigure(2, weight=2)
-
         content_frame.grid_columnconfigure(2, weight=1)
 
         name_label = tk.Label(content_frame, text="Name: ")
-        name_label.grid(column=1, row=1)
+        name_label.grid(column=1, row=1, padx=5)
 
         name_entry = tk.Entry(content_frame)
-        name_entry.grid(column=2, row=1, sticky="ew")
+        name_entry.grid(column=2, row=1, pady=10, padx=10, sticky="ew")
+
+        weight_label = tk.Label(content_frame, text="Weight: ")
+        weight_label.grid(column=1, row=2, padx=5)
+
+        weight_entry = tk.Entry(content_frame)
+        weight_entry.grid(column=2, row=2, pady=10, padx=10, sticky="ew")
+
+        source_label = tk.Label(content_frame, text="Source: ")
+        source_label.grid(column=1, row=3, padx=10)
+
+        source_entry = tk.Entry(content_frame)
+        source_entry.grid(column=2, row=3, pady=10, padx=10, sticky="ew")
+
+        back_button = tk.Button(content_frame,
+                                text="Submit",
+                                width=10,
+                                height=2,
+                                bg=LIGHT_ORANGE,
+                                borderwidth=1,
+                                relief="solid"
+                                )
+        back_button.grid(column=1, row=4, pady=20, padx=10)
 
 
 content = Content()
