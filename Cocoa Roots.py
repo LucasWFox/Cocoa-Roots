@@ -2,6 +2,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import pickle
 from PIL import Image, ImageTk
+from tkinter import messagebox
 
 # lists of classes and objects
 # these lists are global
@@ -445,12 +446,25 @@ class IngredientPage(tk.Frame):
         weight = self.weight_entry.get()
         source = self.source_entry.get()
 
-        instance = Ingredient(name, weight, source)
-        instance_ID = instance.ID
+        try:
+            weight = float(weight)
 
-        ingredients[instance_ID] = instance
+        except ValueError:
+            messagebox.showerror("Type Error", "Weight must be a number")
 
-        print(ingredients)
+        else:
+            if (not name) or (not weight) or (not source):
+                messagebox.showerror("Existence Error", "Please complete all fields")
+
+            elif weight <= 0:
+                messagebox.showerror("Range Error", "Weight must be positive number")
+
+            else:
+                print(weight)
+                instance = Ingredient(name, weight, source)
+                instance_ID = instance.ID
+                ingredients[instance_ID] = instance
+                print(ingredients)
 
 
 content = Content()
