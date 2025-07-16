@@ -475,8 +475,9 @@ class BatchPage(tk.Frame):
         self.batch_ID = ""
 
         tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(2, weight=4)
+
+        for i in range(1, 11):
+            self.grid_rowconfigure(i, weight=1)
 
         self.grid_columnconfigure(1, weight=1)
 
@@ -502,7 +503,31 @@ class BatchPage(tk.Frame):
 
         # __________ Page Content __________
 
-        #batch_methods = [method for method in dir(Batch) if method[:2] != "__"]
+        batch_methods = [method for method in dir(Batch)
+                         if method[:2] != "__"
+                         and method not in ["ID_counter", "save"]]
+
+        method_row = 2
+        for method in batch_methods:
+            method_frame = tk.Frame(self,
+                                    bg=LIGHT_ORANGE,
+                                    height=40,
+                                    width=50,
+                                    borderwidth=1,
+                                    relief="solid"
+                                    )
+            method_frame.grid(row=method_row, column=1, padx=50, sticky="we")
+
+            method_frame.grid_propagate(False)
+            method_frame.rowconfigure(1, weight=1)
+
+            self.method_label = tk.Label(method_frame,
+                                         bg=LIGHT_ORANGE,
+                                         text=method
+                                         )
+            self.method_label.grid(row=1, column=1)
+
+            method_row += 1
 
     def create_batch(self):
         instance = Batch()
@@ -513,7 +538,6 @@ class BatchPage(tk.Frame):
 
         self.batch_ID = instance_ID
         self.title_label.config(text=instance_ID)
-
 
 
 content = Content()
