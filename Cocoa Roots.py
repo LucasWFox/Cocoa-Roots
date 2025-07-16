@@ -7,8 +7,8 @@ from tkinter import messagebox
 # lists of classes and objects
 # these lists are global
 ingredients = {}
-batches = []
-tickets = []
+batches = {}
+tickets = {}
 
 # global colours
 RED = "#b3152a"
@@ -38,10 +38,6 @@ class Ingredient:
         self.weight = weight
         self.source = source  # name of ingredient suppler
 
-        messagebox.showinfo("New Batch", f"Ingredient Added\n\n "
-                                         f"Name:{self.name}\n "
-                                         f"ID:{self.ID}")
-
     def reduce_amount(self, amount):
         calc_weight = self.weight - amount
 
@@ -55,15 +51,13 @@ class Ingredient:
 class Batch:
     ID_counter = 1
 
-    def __init__(self, name):
+    def __init__(self):
         self.log = []  # list of every event occurred in batch
 
-        self.ID = f"BAT-{Ingredient.ID_counter:03d}-{name[:3].upper()}"  # Batch unique identifier
+        self.ID = f"BAT-{Batch.ID_counter:03d}"  # Batch unique identifier
+        Batch.ID_counter += 1
 
-        self.name = name
         self.total_weight = 0
-
-        messagebox.showinfo("New Batch", "b\n \n \n \n a")
 
     def add_ingredient(self, date_time, ingredient, amount):
         ingredient.reduce_amount(amount)
@@ -107,7 +101,7 @@ class Batch:
     def winnowing(self, date_time, weight_reduced):
 
         if weight_reduced > self.total_weight:  # range check
-            raise ValueError("weight_reduced cannot be greater than total weight")
+            raise ValueError("weight reduced cannot be greater than total weight")
 
         record = {"process": "winnowing",
                   "weight_reduced": weight_reduced,
@@ -230,7 +224,7 @@ class Content(tk.Frame):
 
         self.pages = {}  # dictionary of sub-frames within content
 
-        for page in [UserPage, WorkerPage, ConsumerPage, IngredientPage]:  # for every page within content
+        for page in [UserPage, WorkerPage, ConsumerPage, IngredientPage, BatchPage]:  # for every page within content
             page_class = page(parent=self)  # create frame class
 
             self.pages[page] = page_class
@@ -291,6 +285,8 @@ class UserPage(tk.Frame):
 
 class WorkerPage(tk.Frame):
     def __init__(self, parent):
+        self.batch_ID = ""
+
         tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, weight=4)
@@ -351,12 +347,9 @@ class WorkerPage(tk.Frame):
                                    text="+",
                                    font=("Calabi", 12),
                                    padx=5,
-                                   command=self.add_ingredient
+                                   command=lambda: [parent.pages[BatchPage].create_batch(), parent.navigate(BatchPage)]
                                    )
         batches_button.grid(row=1, column=2, sticky="e", padx=5)
-
-    def add_ingredient(self):
-        print("hello", self.info)
 
 
 class ConsumerPage(tk.Frame):
@@ -448,11 +441,11 @@ class IngredientPage(tk.Frame):
                                 bg=LIGHT_ORANGE,
                                 borderwidth=1,
                                 relief="solid",
-                                command=self.submit
+                                command=self.create_ingredient
                                 )
         back_button.grid(column=1, row=4, pady=20, padx=10)
 
-    def submit(self):
+    def create_ingredient(self):
         name = self.name_entry.get()
         weight = self.weight_entry.get()
         source = self.source_entry.get()
@@ -468,13 +461,59 @@ class IngredientPage(tk.Frame):
                 messagebox.showerror("Existence Error", "Please complete all fields")
 
             elif weight <= 0:
-                messagebox.showerror("Range Error", "Weight must be positive number")
+                messagebox.showerror("Range Error", "Weight must be a positive number")
 
             else:
                 instance = Ingredient(name, weight, source)
                 instance_ID = instance.ID
                 ingredients[instance_ID] = instance
                 print(ingredients)
+
+
+class BatchPage(tk.Frame):
+    def __init__(self, parent):
+        self.batch_ID = ""
+
+        tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=4)
+
+        self.grid_columnconfigure(1, weight=1)
+
+        # __________ Page Title __________
+        title_frame = tk.Frame(self,
+                               bg=LIGHT_BLUE,
+                               height=50,
+                               width=50,
+                               borderwidth=1,
+                               relief="solid"
+                               )
+        title_frame.grid(row=1, column=1, padx=15, sticky="we")
+
+        title_frame.grid_propagate(False)
+        title_frame.rowconfigure(1, weight=1)
+        title_frame.columnconfigure(1, weight=1)
+
+        self.title_label = tk.Label(title_frame,
+                                    bg=LIGHT_BLUE,
+                                    text="..."
+                                    )
+        self.title_label.grid(row=1, column=1)
+
+        # __________ Page Content __________
+
+        #batch_methods = [method for method in dir(Batch) if method[:2] != "__"]
+
+    def create_batch(self):
+        instance = Batch()
+        instance_ID = instance.ID
+
+        batches[instance_ID] = instance
+        print(batches)
+
+        self.batch_ID = instance_ID
+        self.title_label.config(text=instance_ID)
+
 
 
 content = Content()
