@@ -38,6 +38,10 @@ class Ingredient:
         self.weight = weight
         self.source = source  # name of ingredient suppler
 
+        messagebox.showinfo("New Batch", f"Ingredient Added\n\n "
+                                         f"Name:{self.name}\n "
+                                         f"ID:{self.ID}")
+
     def reduce_amount(self, amount):
         calc_weight = self.weight - amount
 
@@ -49,10 +53,17 @@ class Ingredient:
 
 
 class Batch:
-    def __init__(self, ID):
+    ID_counter = 1
+
+    def __init__(self, name):
         self.log = []  # list of every event occurred in batch
+
+        self.ID = f"BAT-{Ingredient.ID_counter:03d}-{name[:3].upper()}"  # Batch unique identifier
+
+        self.name = name
         self.total_weight = 0
-        self.ID = ID  # batch unique identifier
+
+        messagebox.showinfo("New Batch", "b\n \n \n \n a")
 
     def add_ingredient(self, date_time, ingredient, amount):
         ingredient.reduce_amount(amount)
@@ -460,7 +471,6 @@ class IngredientPage(tk.Frame):
                 messagebox.showerror("Range Error", "Weight must be positive number")
 
             else:
-                print(weight)
                 instance = Ingredient(name, weight, source)
                 instance_ID = instance.ID
                 ingredients[instance_ID] = instance
