@@ -520,12 +520,22 @@ class BatchPage(tk.Frame):
 
             method_frame.grid_propagate(False)
             method_frame.rowconfigure(1, weight=1)
+            method_frame.columnconfigure(1, weight=1)
 
             self.method_label = tk.Label(method_frame,
                                          bg=LIGHT_ORANGE,
                                          text=method
                                          )
-            self.method_label.grid(row=1, column=1)
+            self.method_label.grid(row=1, column=1, sticky="w")
+
+            ingredient_button = tk.Button(method_frame,
+                                          bg=LIGHT_BLUE,
+                                          text=">",
+                                          font=("Calabi", 12),
+                                          padx=5,
+                                          command=lambda: parent.navigate(IngredientPage)
+                                          )
+            ingredient_button.grid(row=1, column=2, sticky="e", padx=5)
 
             method_row += 1
 
