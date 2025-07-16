@@ -505,13 +505,13 @@ class BatchPage(tk.Frame):
 
         batch_methods = [method for method in dir(Batch)
                          if method[:2] != "__"
-                         and method not in ["ID_counter", "save"]]
+                         and method not in ["ID_counter", "save", "make_ticket"]]
 
         method_row = 2
         for method in batch_methods:
             method_frame = tk.Frame(self,
                                     bg=LIGHT_ORANGE,
-                                    height=40,
+                                    height=400,
                                     width=50,
                                     borderwidth=1,
                                     relief="solid"
@@ -520,7 +520,7 @@ class BatchPage(tk.Frame):
 
             method_frame.grid_propagate(False)
             method_frame.rowconfigure(1, weight=1)
-            method_frame.columnconfigure(1, weight=1)
+            method_frame.columnconfigure(2, weight=1)
 
             self.method_label = tk.Label(method_frame,
                                          bg=LIGHT_ORANGE,
@@ -530,12 +530,17 @@ class BatchPage(tk.Frame):
 
             ingredient_button = tk.Button(method_frame,
                                           bg=LIGHT_BLUE,
-                                          text=">",
-                                          font=("Calabi", 12),
+                                          text="Submit",
                                           padx=5,
                                           command=lambda: parent.navigate(IngredientPage)
                                           )
-            ingredient_button.grid(row=1, column=2, sticky="e", padx=5)
+            ingredient_button.grid(row=1, column=3, sticky="e", padx=5)
+
+            name_label = tk.Label(method_frame, text="Name: ")
+            name_label.grid(column=1, row=3, padx=5)
+
+            self.name_entry = tk.Entry(method_frame)
+            self.name_entry.grid(column=2, row=3, pady=10, padx=10, sticky="ew")
 
             method_row += 1
 
