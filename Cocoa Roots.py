@@ -38,6 +38,8 @@ class Ingredient:
         self.weight = weight
         self.source = source  # name of ingredient suppler
 
+        messagebox.showinfo("Notification", f"New Ingredient Added, ID: {self.ID}")
+
     def reduce_amount(self, amount):
         calc_weight = self.weight - amount
 
@@ -58,6 +60,8 @@ class Batch:
         Batch.ID_counter += 1
 
         self.total_weight = 0
+
+        messagebox.showinfo("Notification", f"New Batch Created, ID: {self.ID}")
 
     def add_ingredient(self, date_time, ingredient, amount):
         ingredient.reduce_amount(amount)
@@ -183,36 +187,40 @@ def load():
 # -----------------------------------------------------------------------------
 
 # main tkinter setup
-window = tk.Tk()
-window.config(bg="blue")
-window.geometry("400x600")  # window dimensions
-window.title("Cocoa Roots")
-window.grid_columnconfigure(1, weight=1)  # make expandable with screen
-window.grid_rowconfigure(2, weight=1)
+class Window(tk.Tk):
+    def __init__(self, *args, **kwargs):
+        tk.Tk.__init__(self, *args, **kwargs)
 
-# Images
-search_icon = ImageTk.PhotoImage(Image.open("Resources/Search_entry.png").resize((30, 30)))
-logo = ImageTk.PhotoImage(Image.open("Resources/Bean_Logo.png"))
+        logo = ImageTk.PhotoImage(Image.open("Resources/Bean_Logo.png"))
 
-# titlebar
-title_bar = tk.Frame(height=4, bg=ORANGE)
-title_bar.grid(row=1, column=1, sticky="ew")
+        self.config(bg="blue")
+        self.geometry("400x600")  # window dimensions
+        self.title("Cocoa Roots")
+        self.grid_columnconfigure(1, weight=1)  # make expandable with screen
+        self.grid_rowconfigure(2, weight=1)
 
-logo_label = tk.Label(title_bar, image=logo, bg=ORANGE)
-logo_label.pack(side=tk.LEFT)
+        # titlebar
+        self.title_bar = tk.Frame(height=4, bg=ORANGE)
+        self.title_bar.grid(row=1, column=1, sticky="ew")
 
-title_text = tk.Label(title_bar, text="Cocoa Roots", font=("Bernard MT Condensed", 25), bg=ORANGE)
-title_text.pack(side=tk.LEFT)
+        logo_label = tk.Label(self.title_bar, image=logo, bg=ORANGE)
+        logo_label.pack(side=tk.LEFT)
+
+        title_text = tk.Label(self.title_bar, text="Cocoa Roots", font=("Bernard MT Condensed", 25), bg=ORANGE)
+        title_text.pack(side=tk.LEFT)
+
+        content = Content(self)
+        content.grid(row=2, column=1, sticky="nsew")
 
 
 class Content(tk.Frame):
-    def __init__(self):
+    def __init__(self, parent):
         tk.Frame.__init__(self, bg=BACKGROUND, height=20, borderwidth=1, relief="solid")
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
         self.back_track = {}
-        self.back_button = tk.Button(title_bar,
+        self.back_button = tk.Button(parent.title_bar,
                                      text="<",
                                      width=7,
                                      height=2,
@@ -355,6 +363,9 @@ class WorkerPage(tk.Frame):
 class ConsumerPage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
+
+        search_icon = ImageTk.PhotoImage(Image.open("Resources/Search_entry.png").resize((30, 30)))
+
         self.grid_columnconfigure(1, weight=1)
 
         search_background = tk.Frame(self, bg=LIGHT_ORANGE, borderwidth=1, relief="solid")
@@ -536,7 +547,7 @@ class BatchPage(tk.Frame):
                                           )
             ingredient_button.grid(row=1, column=3, sticky="e", padx=5)
 
-            name_label = tk.Label(method_frame, text="Name: ")
+            name_label = tk.Label(method_frame, text="filed: ")
             name_label.grid(column=1, row=3, padx=5)
 
             self.name_entry = tk.Entry(method_frame)
@@ -555,7 +566,6 @@ class BatchPage(tk.Frame):
         self.title_label.config(text=instance_ID)
 
 
-content = Content()
-content.grid(row=2, column=1, sticky="nsew")
+window = Window()
 
 window.mainloop()
