@@ -12,14 +12,14 @@ tickets = {}
 
 # global colours
 BLACK = "#000000"
-RED = "#b3152a"
+RED = "#B3152A"
 ORANGE = "#F6A482"
-DARK_ORANGE = "#ed652d"
+DARK_ORANGE = "#ED652D"
 LIGHT_ORANGE = "#FEDBC7"
 LIGHT_BLUE = "#D1E5F0"
 DARK_BLUE = "#8EC4DE"
-BACKGROUND = "#f5f0ed"
-ERROR_GREEN = "#46f274"  # This colour should only be on hidden elements
+BACKGROUND = "#F5F0ED"
+ERROR_GREEN = "#46F274"  # This colour should only be on hidden elements
 
 
 # -----------------------------------------------------------------------------
@@ -547,6 +547,12 @@ class ScrollableBatchContent(tk.Canvas):
     def __init__(self, parent):
         tk.Canvas.__init__(self, parent)
 
+        self.content = tk.Frame(self, bg=DARK_BLUE)
+
+        for i in range(1, 11):
+            self.content.grid_rowconfigure(i, weight=1)
+        self.content.grid_columnconfigure(1, weight=1)
+
         # __________ Scrollbar Stuff __________
         scroll_bar = ttk.Scrollbar(parent, orient="vertical", command=self.yview)
         self.configure(yscrollcommand=scroll_bar.set)
@@ -554,22 +560,16 @@ class ScrollableBatchContent(tk.Canvas):
         scroll_bar.pack(side="right", fill="y")
         self.pack(side="left", fill="both", expand=True)
 
-        self.content = tk.Frame(self, bg=DARK_BLUE)
         self.window_id = self.create_window((0, 0), window=self.content, anchor="nw")
 
         self.content.bind("<Configure>", lambda event: self.configure(scrollregion=self.bbox("all")))
         self.bind("<Configure>", lambda event: self.itemconfig(self.window_id, width=event.width))
 
+        # __________ Content Stuff __________
         batch_methods = [method for method in dir(Batch)
                          if method[:2] != "__"
-                         and method not in ["ID_counter", "save", "make_ticket"]]
-
-
-
-        for i in range(1, 11):
-            self.content.grid_rowconfigure(i, weight=1)
-
-        self.content.grid_columnconfigure(1, weight=1)
+                         and method not in ["ID_counter", "save", "make_ticket"]
+                         ]
 
         method_row = 2
         for method in batch_methods:
@@ -580,14 +580,13 @@ class ScrollableBatchContent(tk.Canvas):
                                     )
             method_frame.grid(row=method_row, column=1, pady=10, sticky="we")
 
-            method_frame.rowconfigure(1, weight=1)
-            method_frame.columnconfigure(2, weight=1)
+            method_frame.columnconfigure(3, weight=1)
 
             self.method_label = tk.Label(method_frame,
                                          bg=LIGHT_ORANGE,
                                          text=method
                                          )
-            self.method_label.grid(row=1, column=1, sticky="w")
+            self.method_label.grid(row=1, column=1, columnspan=2, sticky="w")
 
             ingredient_button = tk.Button(method_frame,
                                           bg=LIGHT_ORANGE,
@@ -595,13 +594,18 @@ class ScrollableBatchContent(tk.Canvas):
                                           padx=5,
                                           command=lambda: parent.navigate(IngredientPage)
                                           )
-            ingredient_button.grid(row=1, column=3, sticky="e", padx=5)
+            ingredient_button.grid(row=1, column=4, sticky="e", padx=5)
 
             name_label = tk.Label(method_frame, text="filed: ")
-            name_label.grid(column=1, row=3, padx=5)
+            name_label.grid(column=1, row=2, padx=5)
 
             self.name_entry = tk.Entry(method_frame)
-            self.name_entry.grid(column=2, row=3, pady=10, padx=10, sticky="ew")
+            self.name_entry.grid(column=2, columnspan=3, row=2, pady=10, padx=10, sticky="ew")
+
+            """i = 1
+            for c in ["blue", "green", "red", "black"]:
+                tk.Label(method_frame, bg=c).grid(row=3, column=i, sticky="ew")
+                i +=1"""
 
             method_row += 1
 
