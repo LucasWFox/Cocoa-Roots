@@ -1,11 +1,11 @@
+import pickle
 import tkinter as tk
 import tkinter.ttk as ttk
-import pickle
-from PIL import Image, ImageTk
 from tkinter import messagebox
+from PIL import Image, ImageTk
 
 # lists of classes and objects
-# these lists are global
+# these associative arrays are global
 ingredients = {}
 batches = {}
 tickets = {}
@@ -191,7 +191,7 @@ class Window(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
 
-        logo = ImageTk.PhotoImage(Image.open("Resources/Bean_Logo.png"))
+        self.logo = ImageTk.PhotoImage(Image.open("Resources/Bean_Logo.png"))
 
         self.config(bg="blue")
         self.geometry("400x600")  # window dimensions
@@ -203,7 +203,7 @@ class Window(tk.Tk):
         self.title_bar = tk.Frame(height=4, bg=ORANGE)
         self.title_bar.grid(row=1, column=1, sticky="ew")
 
-        logo_label = tk.Label(self.title_bar, image=logo, bg=ORANGE)
+        logo_label = tk.Label(self.title_bar, image=self.logo, bg=ORANGE)
         logo_label.pack(side=tk.LEFT)
 
         title_text = tk.Label(self.title_bar, text="Cocoa Roots", font=("Bernard MT Condensed", 25), bg=ORANGE)
@@ -364,7 +364,7 @@ class ConsumerPage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
 
-        search_icon = ImageTk.PhotoImage(Image.open("Resources/Search_entry.png").resize((30, 30)))
+        self.search_icon = ImageTk.PhotoImage(Image.open("Resources/Search_entry.png").resize((30, 30)))
 
         self.grid_columnconfigure(1, weight=1)
 
@@ -380,7 +380,7 @@ class ConsumerPage(tk.Frame):
         search_bar.grid(row=1, column=1, pady=(10, 0), ipady=7, padx=20, sticky="we")
 
         search_button = tk.Button(search_background,
-                                  image=search_icon,
+                                  image=self.search_icon,
                                   bg=LIGHT_ORANGE,
                                   height=25,
                                   borderwidth=1,
@@ -483,12 +483,14 @@ class IngredientPage(tk.Frame):
 
 class BatchPage(tk.Frame):
     def __init__(self, parent):
-        self.batch_ID = ""
-
         tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
 
-        for i in range(1, 11):
-            self.grid_rowconfigure(i, weight=1)
+        self.batch_ID = ""
+
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=1)
+        """for i in range(1, 11):
+            self.grid_rowconfigure(i, weight=1)"""
 
         self.grid_columnconfigure(1, weight=1)
 
@@ -519,7 +521,7 @@ class BatchPage(tk.Frame):
                          and method not in ["ID_counter", "save", "make_ticket"]]
 
         method_row = 2
-        for method in batch_methods:
+        """for method in batch_methods:
             method_frame = tk.Frame(self,
                                     bg=LIGHT_ORANGE,
                                     height=400,
@@ -553,7 +555,13 @@ class BatchPage(tk.Frame):
             self.name_entry = tk.Entry(method_frame)
             self.name_entry.grid(column=2, row=3, pady=10, padx=10, sticky="ew")
 
-            method_row += 1
+            method_row += 1"""
+
+        frame = tk.Frame(self)
+        frame.grid(row=2, column=1)
+
+        space = ScrollableBatchContent(frame)
+        space.pack()
 
     def create_batch(self):
         instance = Batch()
@@ -564,6 +572,30 @@ class BatchPage(tk.Frame):
 
         self.batch_ID = instance_ID
         self.title_label.config(text=instance_ID)
+
+
+class ScrollableBatchContent(tk.Canvas):
+    def __init__(self, parent):
+        tk.Canvas.__init__(self, parent, borderwidth=1, relief="solid")
+
+        scrollbar = tk.Scrollbar(parent, orient="vertical", command=self.yview)
+        self.configure(yscrollcommand=scrollbar.set)
+
+        scrollbar.pack(side="right", fill="y")
+        self.pack(side="left", fill="both", expand=True)
+
+        # Create a frame inside the canvas
+        area = tk.Frame(self)
+        self.create_window((0, 0), window=area, anchor="nw")
+
+        area.bind("<Configure>", lambda event: self.configure(scrollregion=self.bbox("all")))
+
+        for i in range(50):
+            bars = tk.Label(area, text=f"Item {i + 1}")
+            bars.pack()
+
+            if (i + 1) % 10 == 0:
+                tk.Button(bars, text="cool").pack()
 
 
 window = Window()
