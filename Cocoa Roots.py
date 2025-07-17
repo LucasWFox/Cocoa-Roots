@@ -572,7 +572,11 @@ class ScrollableBatchContent(tk.Canvas):
                          ]
 
         method_row = 2
-        for method in batch_methods:
+        for method_str in batch_methods:
+            method_func = getattr(Batch, method_str)
+            parameters = list(method_func.__code__.co_varnames)
+            parameters.remove("self")
+
             method_frame = tk.Frame(self.content,
                                     bg=LIGHT_BLUE,
                                     borderwidth=1,
@@ -584,7 +588,7 @@ class ScrollableBatchContent(tk.Canvas):
 
             self.method_label = tk.Label(method_frame,
                                          bg=LIGHT_ORANGE,
-                                         text=method
+                                         text=method_str
                                          )
             self.method_label.grid(row=1, column=1, columnspan=2, sticky="w")
 
@@ -596,7 +600,7 @@ class ScrollableBatchContent(tk.Canvas):
                                           )
             ingredient_button.grid(row=1, column=4, sticky="e", padx=5)
 
-            name_label = tk.Label(method_frame, text="filed: ")
+            name_label = tk.Label(method_frame, text=str(parameters))
             name_label.grid(column=1, row=2, padx=5)
 
             self.name_entry = tk.Entry(method_frame)
