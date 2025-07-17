@@ -1,4 +1,4 @@
-import pickle
+# import pickle
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import messagebox
@@ -169,8 +169,8 @@ class Batch:
 
 
 class Ticket:
-    def __init__(self, ID):
-        self.ID = ID
+    def __init__(self):
+        self.ID = ""
 
     def access_ticket(self):
         ...
@@ -204,7 +204,7 @@ class Window(tk.Tk):
         style.theme_use('clam')
 
         # list the options of the style
-        # (Argument should be an element of TScrollbar, eg. "thumb", "trough", ...)
+        # (Argument should be an element of TScrollbar, e.g. "thumb", "trough", ...)
         print(style.element_options("Horizontal.TScrollbar.thumb"))
 
         # configure the style
@@ -600,11 +600,15 @@ class ScrollableBatchContent(tk.Canvas):
                                           )
             ingredient_button.grid(row=1, column=4, sticky="e", padx=5)
 
-            name_label = tk.Label(method_frame, text=str(parameters))
-            name_label.grid(column=1, row=2, padx=5)
+            row = 2
+            for parameter in parameters:
+                name_label = tk.Label(method_frame, text=parameter)
+                name_label.grid(column=1, row=row, padx=5)
 
-            self.name_entry = tk.Entry(method_frame)
-            self.name_entry.grid(column=2, columnspan=3, row=2, pady=10, padx=10, sticky="ew")
+                name_entry = tk.Entry(method_frame)
+                name_entry.grid(column=2, columnspan=3, row=row, pady=10, padx=10, sticky="ew")
+
+                row += 1
 
             """i = 1
             for c in ["blue", "green", "red", "black"]:
