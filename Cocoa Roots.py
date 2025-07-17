@@ -11,6 +11,7 @@ batches = {}
 tickets = {}
 
 # global colours
+BLACK = "#000000"
 RED = "#b3152a"
 ORANGE = "#F6A482"
 DARK_ORANGE = "#ed652d"
@@ -198,6 +199,18 @@ class Window(tk.Tk):
         self.title("Cocoa Roots")
         self.grid_columnconfigure(1, weight=1)  # make expandable with screen
         self.grid_rowconfigure(2, weight=1)
+
+        style = ttk.Style()
+        style.theme_use('clam')
+
+        # list the options of the style
+        # (Argument should be an element of TScrollbar, eg. "thumb", "trough", ...)
+        print(style.element_options("Horizontal.TScrollbar.thumb"))
+
+        # configure the style
+        style.configure("Horizontal.TScrollbar", gripcount=0,
+                        background="Green", darkcolor="DarkGreen", lightcolor="LightGreen",
+                        troughcolor="gray", bordercolor="blue", arrowcolor="white")
 
         # titlebar
         self.title_bar = tk.Frame(height=4, bg=ORANGE)
@@ -423,7 +436,7 @@ class IngredientPage(tk.Frame):
 
         # __________ Page Content __________
         content_frame = tk.Frame(self, width=200, height=200)
-        content_frame.grid(column=1, row=2, sticky="nesw")
+        content_frame.grid(column=1, row=2, sticky="nsew")
 
         content_frame.grid_columnconfigure(2, weight=1)
 
@@ -488,9 +501,7 @@ class BatchPage(tk.Frame):
         self.batch_ID = ""
 
         self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(2, weight=1)
-        """for i in range(1, 11):
-            self.grid_rowconfigure(i, weight=1)"""
+        self.grid_rowconfigure(2, weight=3)
 
         self.grid_columnconfigure(1, weight=1)
 
@@ -515,53 +526,11 @@ class BatchPage(tk.Frame):
         self.title_label.grid(row=1, column=1)
 
         # __________ Page Content __________
+        content_frame = tk.Frame(self, bg=BLACK)
+        content_frame.grid(row=2, column=1, sticky="nsew", pady=10, padx=10)
 
-        batch_methods = [method for method in dir(Batch)
-                         if method[:2] != "__"
-                         and method not in ["ID_counter", "save", "make_ticket"]]
-
-        method_row = 2
-        """for method in batch_methods:
-            method_frame = tk.Frame(self,
-                                    bg=LIGHT_ORANGE,
-                                    height=400,
-                                    width=50,
-                                    borderwidth=1,
-                                    relief="solid"
-                                    )
-            method_frame.grid(row=method_row, column=1, padx=50, sticky="we")
-
-            method_frame.grid_propagate(False)
-            method_frame.rowconfigure(1, weight=1)
-            method_frame.columnconfigure(2, weight=1)
-
-            self.method_label = tk.Label(method_frame,
-                                         bg=LIGHT_ORANGE,
-                                         text=method
-                                         )
-            self.method_label.grid(row=1, column=1, sticky="w")
-
-            ingredient_button = tk.Button(method_frame,
-                                          bg=LIGHT_BLUE,
-                                          text="Submit",
-                                          padx=5,
-                                          command=lambda: parent.navigate(IngredientPage)
-                                          )
-            ingredient_button.grid(row=1, column=3, sticky="e", padx=5)
-
-            name_label = tk.Label(method_frame, text="filed: ")
-            name_label.grid(column=1, row=3, padx=5)
-
-            self.name_entry = tk.Entry(method_frame)
-            self.name_entry.grid(column=2, row=3, pady=10, padx=10, sticky="ew")
-
-            method_row += 1"""
-
-        frame = tk.Frame(self)
-        frame.grid(row=2, column=1)
-
-        space = ScrollableBatchContent(frame)
-        space.pack()
+        scroll_area = ScrollableBatchContent(content_frame)
+        scroll_area.pack(expand=True, pady=3, padx=3)
 
     def create_batch(self):
         instance = Batch()
@@ -576,26 +545,65 @@ class BatchPage(tk.Frame):
 
 class ScrollableBatchContent(tk.Canvas):
     def __init__(self, parent):
-        tk.Canvas.__init__(self, parent, borderwidth=1, relief="solid")
+        tk.Canvas.__init__(self, parent)
 
-        scrollbar = tk.Scrollbar(parent, orient="vertical", command=self.yview)
-        self.configure(yscrollcommand=scrollbar.set)
+        # __________ Scrollbar Stuff __________
+        scroll_bar = ttk.Scrollbar(parent, orient="vertical", command=self.yview)
+        self.configure(yscrollcommand=scroll_bar.set)
 
-        scrollbar.pack(side="right", fill="y")
+        scroll_bar.pack(side="right", fill="y")
         self.pack(side="left", fill="both", expand=True)
 
-        # Create a frame inside the canvas
-        area = tk.Frame(self)
-        self.create_window((0, 0), window=area, anchor="nw")
+        self.content = tk.Frame(self, bg=DARK_BLUE)
+        self.window_id = self.create_window((0, 0), window=self.content, anchor="nw")
 
-        area.bind("<Configure>", lambda event: self.configure(scrollregion=self.bbox("all")))
+        self.content.bind("<Configure>", lambda event: self.configure(scrollregion=self.bbox("all")))
+        self.bind("<Configure>", lambda event: self.itemconfig(self.window_id, width=event.width))
 
-        for i in range(50):
-            bars = tk.Label(area, text=f"Item {i + 1}")
-            bars.pack()
+        batch_methods = [method for method in dir(Batch)
+                         if method[:2] != "__"
+                         and method not in ["ID_counter", "save", "make_ticket"]]
 
-            if (i + 1) % 10 == 0:
-                tk.Button(bars, text="cool").pack()
+
+
+        for i in range(1, 11):
+            self.content.grid_rowconfigure(i, weight=1)
+
+        self.content.grid_columnconfigure(1, weight=1)
+
+        method_row = 2
+        for method in batch_methods:
+            method_frame = tk.Frame(self.content,
+                                    bg=LIGHT_BLUE,
+                                    borderwidth=1,
+                                    relief="solid"
+                                    )
+            method_frame.grid(row=method_row, column=1, pady=10, sticky="we")
+
+            method_frame.rowconfigure(1, weight=1)
+            method_frame.columnconfigure(2, weight=1)
+
+            self.method_label = tk.Label(method_frame,
+                                         bg=LIGHT_ORANGE,
+                                         text=method
+                                         )
+            self.method_label.grid(row=1, column=1, sticky="w")
+
+            ingredient_button = tk.Button(method_frame,
+                                          bg=LIGHT_ORANGE,
+                                          text="Submit",
+                                          padx=5,
+                                          command=lambda: parent.navigate(IngredientPage)
+                                          )
+            ingredient_button.grid(row=1, column=3, sticky="e", padx=5)
+
+            name_label = tk.Label(method_frame, text="filed: ")
+            name_label.grid(column=1, row=3, padx=5)
+
+            self.name_entry = tk.Entry(method_frame)
+            self.name_entry.grid(column=2, row=3, pady=10, padx=10, sticky="ew")
+
+            method_row += 1
 
 
 window = Window()
