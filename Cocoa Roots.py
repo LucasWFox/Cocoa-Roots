@@ -456,7 +456,8 @@ class ScrollableBatches(tk.Canvas):
             self.grandparent.navigate(WorkerBatchPage)
             self.grandparent.pages[WorkerBatchPage].update_title(batch_ID)
         else:
-            self.grandparent.navigate(IngredientPage)
+            self.grandparent.navigate(ConsumerBatchPage)
+            self.grandparent.pages[ConsumerBatchPage].update_title(batch_ID)
 
 
 class ConsumerPage(tk.Frame):
@@ -505,21 +506,19 @@ class ConsumerBatchPage(tk.Frame):
         tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
 
         self.batch_ID = ""
-
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(2, weight=3)
+        self.logs = []
 
         self.grid_columnconfigure(1, weight=1)
 
         # __________ Page Title __________
         title_frame = tk.Frame(self,
-                               bg=ERROR_GREEN, #LIGHT_BLUE,
+                               bg=LIGHT_BLUE,
                                height=50,
                                width=50,
                                borderwidth=1,
                                relief="solid"
                                )
-        title_frame.grid(row=1, column=1, padx=15, sticky="we")
+        title_frame.grid(row=1, column=1, padx=15, pady=10, sticky="we")
 
         title_frame.grid_propagate(False)
         title_frame.rowconfigure(1, weight=1)
@@ -533,16 +532,19 @@ class ConsumerBatchPage(tk.Frame):
 
         # __________ Page Content __________
 
-
     def update_title(self, instance_ID):
         self.batch_ID = instance_ID
         self.title_label.config(text=instance_ID)
 
+        for widget in self.logs:
+            widget.destroy()
+
         row = 2
         for process in batches[instance_ID].log:
-            tk.Label(self, text=str(process)).grid(row=row, column=1)
+            process_label = tk.Label(self, text=str(process))
+            process_label.grid(row=row, column=1)
+            self.logs.append(process_label)
             row += 1
-
 
 
 class IngredientPage(tk.Frame):
