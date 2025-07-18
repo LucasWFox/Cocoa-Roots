@@ -384,7 +384,10 @@ class WorkerPage(tk.Frame):
         self.scroll_area.pack(fill="both", expand=True, pady=3, padx=3)
 
     def add_batch(self):
-        self.parent.pages[BatchPage].create_batch()
+        instance = Batch()
+        instance_ID = instance.ID
+
+        batches[instance_ID] = instance
         self.scroll_area.update_batch_list()
         self.parent.pages[ConsumerPage].scroll_area.update_batch_list()
 
@@ -624,12 +627,6 @@ class BatchPage(tk.Frame):
 
         scroll_area = ScrollableBatchContent(content_frame, self)
         scroll_area.pack(expand=True, pady=3, padx=3)
-
-    def create_batch(self):
-        instance = Batch()
-        instance_ID = instance.ID
-
-        batches[instance_ID] = instance
 
     def update_title(self, instance_ID):
         self.batch_ID = instance_ID
