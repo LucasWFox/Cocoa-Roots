@@ -128,6 +128,7 @@ class Batch:
         self.log.append(record)
 
     def conching(self, date_time, temperature):
+        print("here shackalaka")
 
         record = {"process": "conching",
                   "temperature": temperature,
@@ -526,10 +527,12 @@ class BatchPage(tk.Frame):
         self.title_label.grid(row=1, column=1)
 
         # __________ Page Content __________
+        self.method_entries = {}
+
         content_frame = tk.Frame(self, bg=BLACK)
         content_frame.grid(row=2, column=1, sticky="nsew", pady=10, padx=10)
 
-        scroll_area = ScrollableBatchContent(content_frame)
+        scroll_area = ScrollableBatchContent(content_frame, self)
         scroll_area.pack(expand=True, pady=3, padx=3)
 
     def create_batch(self):
@@ -542,10 +545,22 @@ class BatchPage(tk.Frame):
         self.batch_ID = instance_ID
         self.title_label.config(text=instance_ID)
 
+    def alter_batch(self, method_str):
+        method_func = getattr(batches[self.batch_ID], method_str)
+
+        method_entries = self.method_entries[method_str]
+
+        kwargs = {}
+
+        for parameter in method_entries.keys():
+
+            kwargs[parameter] = method_entries[parameter].get()
+
+        method_func(**kwargs)
 
 class ScrollableBatchContent(tk.Canvas):
-    def __init__(self, parent):
-        tk.Canvas.__init__(self, parent)
+    def __init__(self, location, parent):
+        tk.Canvas.__init__(self, location)
 
         self.content = tk.Frame(self, bg=DARK_BLUE)
 
@@ -554,7 +569,7 @@ class ScrollableBatchContent(tk.Canvas):
         self.content.grid_columnconfigure(1, weight=1)
 
         # __________ Scrollbar Stuff __________
-        scroll_bar = ttk.Scrollbar(parent, orient="vertical", command=self.yview)
+        scroll_bar = ttk.Scrollbar(location, orient="vertical", command=self.yview)
         self.configure(yscrollcommand=scroll_bar.set)
 
         scroll_bar.pack(side="right", fill="y")
@@ -566,15 +581,15 @@ class ScrollableBatchContent(tk.Canvas):
         self.bind("<Configure>", lambda event: self.itemconfig(self.window_id, width=event.width))
 
         # __________ Content Stuff __________
-        batch_methods = [method for method in dir(Batch)
+        self.batch_methods = [method for method in dir(Batch)
                          if method[:2] != "__"
-                         and method not in ["ID_counter", "save", "make_ticket"]
+                         and method not in ["ID_counter", "save"]
                          ]
 
         method_row = 2
-        for method_str in batch_methods:
+        for method_str in self.batch_methods:
             method_func = getattr(Batch, method_str)
-            parameters = list(method_func.__code__.co_varnames)
+            parameters = list(method_func.__code__.co_varnames[:method_func.__code__.co_argcount])
             parameters.remove("self")
 
             method_frame = tk.Frame(self.content,
@@ -592,14 +607,15 @@ class ScrollableBatchContent(tk.Canvas):
                                          )
             self.method_label.grid(row=1, column=1, columnspan=2, sticky="w")
 
-            ingredient_button = tk.Button(method_frame,
-                                          bg=LIGHT_ORANGE,
-                                          text="Submit",
-                                          padx=5,
-                                          command=lambda: parent.navigate(IngredientPage)
-                                          )
-            ingredient_button.grid(row=1, column=4, sticky="e", padx=5)
+            submit_button = tk.Button(method_frame,
+                                      bg=LIGHT_ORANGE,
+                                      text="Submit",
+                                      padx=5,
+                                      command=lambda arg=method_str: parent.alter_batch(arg)
+                                      )
+            submit_button.grid(row=1, column=4, sticky="e", padx=5)
 
+            parameter_entries = {}
             row = 2
             for parameter in parameters:
                 name_label = tk.Label(method_frame, text=parameter)
@@ -608,7 +624,11 @@ class ScrollableBatchContent(tk.Canvas):
                 name_entry = tk.Entry(method_frame)
                 name_entry.grid(column=2, columnspan=3, row=row, pady=10, padx=10, sticky="ew")
 
+                parameter_entries[parameter] = name_entry
+
                 row += 1
+
+            parent.method_entries[method_str] = parameter_entries
 
             """i = 1
             for c in ["blue", "green", "red", "black"]:
