@@ -381,18 +381,20 @@ class WorkerPage(tk.Frame):
         content_frame = tk.Frame(self, bg=BLACK)
         content_frame.grid(row=3, column=1, sticky="nsew", pady=(0, 20), padx=10)
 
-        self.scroll_area = ScrollableBatches(content_frame)
+        self.scroll_area = ScrollableBatches(content_frame, parent)
         self.scroll_area.pack(fill="both", expand=True, pady=3, padx=3)
 
     def add_batch(self):
         self.parent.pages[BatchPage].create_batch()
-        self.parent.navigate(BatchPage)
         self.scroll_area.update_batch_list()
 
 
 class ScrollableBatches(tk.Canvas):
-    def __init__(self, parent, **kwargs):
+    def __init__(self, parent, grandparent, **kwargs):
         super().__init__(parent, bg=DARK_BLUE, **kwargs)
+
+        self.parent = parent
+        self.grandparent = grandparent
 
         self.content = tk.Frame(self, bg=DARK_BLUE)
 
@@ -438,10 +440,16 @@ class ScrollableBatches(tk.Canvas):
                                       bg=LIGHT_ORANGE,
                                       text=">",
                                       padx=5,
-                                      command=lambda arg="method_str": print(arg)
+                                      command=lambda arg=batch.ID: self.navigate_batch(arg)
                                       )
             submit_button.grid(row=1, column=4, sticky="e", padx=5)
             batch_row += 1
+
+    def navigate_batch(self, batch_ID):
+        self.grandparent.navigate(BatchPage)
+        self.grandparent.pages[BatchPage].update_title(batch_ID)
+
+
 
 
 class ConsumerPage(tk.Frame):
@@ -610,8 +618,8 @@ class BatchPage(tk.Frame):
         instance_ID = instance.ID
 
         batches[instance_ID] = instance
-        print(batches)
 
+    def update_title(self, instance_ID):
         self.batch_ID = instance_ID
         self.title_label.config(text=instance_ID)
 
