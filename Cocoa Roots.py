@@ -307,11 +307,14 @@ class UserPage(tk.Frame):
 
 class WorkerPage(tk.Frame):
     def __init__(self, parent):
-        self.batch_ID = ""
-
         tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
+
+        self.batch_ID = ""
+        self.parent = parent
+
         self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(2, weight=4)
+        self.grid_rowconfigure(2, weight=1)
+        self.grid_rowconfigure(3, weight=2)
 
         self.grid_columnconfigure(1, weight=1)
 
@@ -369,9 +372,76 @@ class WorkerPage(tk.Frame):
                                    text="+",
                                    font=("Calabi", 12),
                                    padx=5,
-                                   command=lambda: [parent.pages[BatchPage].create_batch(), parent.navigate(BatchPage)]
+                                   command=lambda: self.add_batch()
                                    )
         batches_button.grid(row=1, column=2, sticky="e", padx=5)
+
+        # __________ Existing Batches __________
+
+        content_frame = tk.Frame(self, bg=BLACK)
+        content_frame.grid(row=3, column=1, sticky="nsew", pady=(0, 20), padx=10)
+
+        self.scroll_area = ScrollableBatches(content_frame)
+        self.scroll_area.pack(fill="both", expand=True, pady=3, padx=3)
+
+    def add_batch(self):
+        self.parent.pages[BatchPage].create_batch()
+        self.parent.navigate(BatchPage)
+        self.scroll_area.update_batch_list()
+
+
+class ScrollableBatches(tk.Canvas):
+    def __init__(self, parent, **kwargs):
+        super().__init__(parent, bg=DARK_BLUE, **kwargs)
+
+        self.content = tk.Frame(self, bg=DARK_BLUE)
+
+        self.content.grid_columnconfigure(1, weight=1)
+
+        # __________ Scrollbar Stuff __________
+        scroll_bar = ttk.Scrollbar(parent, orient="vertical", command=self.yview)
+        self.configure(yscrollcommand=scroll_bar.set)
+
+        scroll_bar.pack(side="right", fill="y")
+        self.pack(side="left", fill="both", expand=True)
+
+        self.window_id = self.create_window((0, 0), window=self.content, anchor="nw")
+
+        self.content.bind("<Configure>", lambda event: self.configure(scrollregion=self.bbox("all")))
+        self.bind("<Configure>", lambda event: self.itemconfig(self.window_id, width=event.width))
+
+        # __________ Content Stuff __________
+        self.update_batch_list()
+
+    def update_batch_list(self):
+        for widget in self.content.winfo_children():
+            widget.destroy()
+
+        batch_row = 1
+        for batch in batches.values():
+            batch_frame = tk.Frame(self.content,
+                                   bg=LIGHT_BLUE,
+                                   borderwidth=1,
+                                   relief="solid"
+                                   )
+            batch_frame.grid(row=batch_row, column=1, pady=10, sticky="we")
+
+            batch_frame.columnconfigure(3, weight=1)
+
+            batch_label = tk.Label(batch_frame,
+                                   bg=LIGHT_ORANGE,
+                                   text=batch.ID
+                                   )
+            batch_label.grid(row=1, column=1, columnspan=2, sticky="w")
+
+            submit_button = tk.Button(batch_frame,
+                                      bg=LIGHT_ORANGE,
+                                      text=">",
+                                      padx=5,
+                                      command=lambda arg="method_str": print(arg)
+                                      )
+            submit_button.grid(row=1, column=4, sticky="e", padx=5)
+            batch_row += 1
 
 
 class ConsumerPage(tk.Frame):
@@ -553,19 +623,17 @@ class BatchPage(tk.Frame):
         kwargs = {}
 
         for parameter in method_entries.keys():
-
             kwargs[parameter] = method_entries[parameter].get()
 
         method_func(**kwargs)
 
+
 class ScrollableBatchContent(tk.Canvas):
     def __init__(self, location, parent):
-        tk.Canvas.__init__(self, location)
+        tk.Canvas.__init__(self, location, bg=DARK_BLUE)
 
         self.content = tk.Frame(self, bg=DARK_BLUE)
 
-        for i in range(1, 11):
-            self.content.grid_rowconfigure(i, weight=1)
         self.content.grid_columnconfigure(1, weight=1)
 
         # __________ Scrollbar Stuff __________
@@ -582,9 +650,9 @@ class ScrollableBatchContent(tk.Canvas):
 
         # __________ Content Stuff __________
         self.batch_methods = [method for method in dir(Batch)
-                         if method[:2] != "__"
-                         and method not in ["ID_counter", "save"]
-                         ]
+                              if method[:2] != "__"
+                              and method not in ["ID_counter", "save"]
+                              ]
 
         method_row = 2
         for method_str in self.batch_methods:
