@@ -245,7 +245,8 @@ class Content(tk.Frame):
 
         self.pages = {}  # dictionary of sub-frames within content
 
-        for page in [UserPage, WorkerPage, ConsumerPage, IngredientPage, BatchPage]:  # for every page within content
+        for page in [UserPage, WorkerPage, ConsumerPage, IngredientPage,
+                     WorkerBatchPage, ConsumerBatchPage]:  # for every page within content
             page_class = page(parent=self)  # create frame class
 
             self.pages[page] = page_class
@@ -452,8 +453,8 @@ class ScrollableBatches(tk.Canvas):
     def navigate_batch(self, batch_ID):
 
         if self.user_type == "worker":
-            self.grandparent.navigate(BatchPage)
-            self.grandparent.pages[BatchPage].update_title(batch_ID)
+            self.grandparent.navigate(WorkerBatchPage)
+            self.grandparent.pages[WorkerBatchPage].update_title(batch_ID)
         else:
             self.grandparent.navigate(IngredientPage)
 
@@ -493,12 +494,55 @@ class ConsumerPage(tk.Frame):
         self.scroll_area = ScrollableBatches(content_frame, parent, "consumer")
         self.scroll_area.pack(fill="both", expand=True, pady=3, padx=3)
 
-
-
     def search(self):
         for batch in batches.values():
             print(batch.log)
         print("search", self.info)
+
+
+class ConsumerBatchPage(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
+
+        self.batch_ID = ""
+
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=3)
+
+        self.grid_columnconfigure(1, weight=1)
+
+        # __________ Page Title __________
+        title_frame = tk.Frame(self,
+                               bg=ERROR_GREEN, #LIGHT_BLUE,
+                               height=50,
+                               width=50,
+                               borderwidth=1,
+                               relief="solid"
+                               )
+        title_frame.grid(row=1, column=1, padx=15, sticky="we")
+
+        title_frame.grid_propagate(False)
+        title_frame.rowconfigure(1, weight=1)
+        title_frame.columnconfigure(1, weight=1)
+
+        self.title_label = tk.Label(title_frame,
+                                    bg=LIGHT_BLUE,
+                                    text="..."
+                                    )
+        self.title_label.grid(row=1, column=1)
+
+        # __________ Page Content __________
+
+
+    def update_title(self, instance_ID):
+        self.batch_ID = instance_ID
+        self.title_label.config(text=instance_ID)
+
+        row = 2
+        for process in batches[instance_ID].log:
+            tk.Label(self, text=str(process)).grid(row=row, column=1)
+            row += 1
+
 
 
 class IngredientPage(tk.Frame):
@@ -588,7 +632,7 @@ class IngredientPage(tk.Frame):
                 ingredients[instance_ID] = instance
 
 
-class BatchPage(tk.Frame):
+class WorkerBatchPage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
 
