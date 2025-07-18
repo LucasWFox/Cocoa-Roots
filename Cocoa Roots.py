@@ -128,7 +128,6 @@ class Batch:
         self.log.append(record)
 
     def conching(self, date_time, temperature):
-        print("here shackalaka")
 
         record = {"process": "conching",
                   "temperature": temperature,
@@ -381,18 +380,20 @@ class WorkerPage(tk.Frame):
         content_frame = tk.Frame(self, bg=BLACK)
         content_frame.grid(row=3, column=1, sticky="nsew", pady=(0, 20), padx=10)
 
-        self.scroll_area = ScrollableBatches(content_frame, parent)
+        self.scroll_area = ScrollableBatches(content_frame, parent, "worker")
         self.scroll_area.pack(fill="both", expand=True, pady=3, padx=3)
 
     def add_batch(self):
         self.parent.pages[BatchPage].create_batch()
         self.scroll_area.update_batch_list()
+        self.parent.pages[ConsumerPage].scroll_area.update_batch_list()
 
 
 class ScrollableBatches(tk.Canvas):
-    def __init__(self, parent, grandparent, **kwargs):
+    def __init__(self, parent, grandparent, user_type, **kwargs):
         super().__init__(parent, bg=DARK_BLUE, **kwargs)
 
+        self.user_type = user_type
         self.parent = parent
         self.grandparent = grandparent
 
@@ -446,10 +447,12 @@ class ScrollableBatches(tk.Canvas):
             batch_row += 1
 
     def navigate_batch(self, batch_ID):
-        self.grandparent.navigate(BatchPage)
-        self.grandparent.pages[BatchPage].update_title(batch_ID)
 
-
+        if self.user_type == "worker":
+            self.grandparent.navigate(BatchPage)
+            self.grandparent.pages[BatchPage].update_title(batch_ID)
+        else:
+            self.grandparent.navigate(IngredientPage)
 
 
 class ConsumerPage(tk.Frame):
@@ -481,7 +484,17 @@ class ConsumerPage(tk.Frame):
                                   )
         search_button.grid(row=1, column=2, padx=(0, 20), pady=(10, 0), ipady=3)
 
+        content_frame = tk.Frame(self, bg=BLACK)
+        content_frame.grid(row=3, column=1, sticky="nsew", padx=10)
+
+        self.scroll_area = ScrollableBatches(content_frame, parent, "consumer")
+        self.scroll_area.pack(fill="both", expand=True, pady=3, padx=3)
+
+
+
     def search(self):
+        for batch in batches.values():
+            print(batch.log)
         print("search", self.info)
 
 
@@ -570,7 +583,6 @@ class IngredientPage(tk.Frame):
                 instance = Ingredient(name, weight, source)
                 instance_ID = instance.ID
                 ingredients[instance_ID] = instance
-                print(ingredients)
 
 
 class BatchPage(tk.Frame):
