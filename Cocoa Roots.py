@@ -1,4 +1,4 @@
-# import pickle
+import pickle
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import messagebox
@@ -9,6 +9,8 @@ from PIL import Image, ImageTk
 ingredients = {}
 batches = {}
 tickets = {}
+
+FILE_NAME = "data.pkl"
 
 # global colours
 BLACK = "#000000"
@@ -164,9 +166,6 @@ class Batch:
 
         ...
 
-    def save(self):
-        ...
-
 
 class Ticket:
     def __init__(self):
@@ -175,12 +174,21 @@ class Ticket:
     def access_ticket(self):
         ...
 
-    def save(self):
-        ...
+
+def save():
+    file_data = {"ingredients": ingredients, "batches": batches, "tickets": tickets}
+
+    with open(FILE_NAME, "wb") as file:
+        pickle.dump(file_data, file)
 
 
 def load():
-    ...
+    file = open(FILE_NAME, "rb")
+    content = pickle.load(file)
+
+    ingredients.update(content["ingredients"])
+    batches.update(content["batches"])
+    tickets.update(content["tickets"])
 
 
 # -----------------------------------------------------------------------------
@@ -202,15 +210,6 @@ class Window(tk.Tk):
 
         style = ttk.Style()
         style.theme_use('clam')
-
-        # list the options of the style
-        # (Argument should be an element of TScrollbar, e.g. "thumb", "trough", ...)
-        print(style.element_options("Horizontal.TScrollbar.thumb"))
-
-        # configure the style
-        style.configure("Horizontal.TScrollbar", gripcount=0,
-                        background="Green", darkcolor="DarkGreen", lightcolor="LightGreen",
-                        troughcolor="gray", bordercolor="blue", arrowcolor="white")
 
         # titlebar
         self.title_bar = tk.Frame(height=4, bg=ORANGE)
@@ -760,11 +759,6 @@ class ScrollableBatchContent(tk.Canvas):
                 row += 1
 
             parent.method_entries[method_str] = parameter_entries
-
-            """i = 1
-            for c in ["blue", "green", "red", "black"]:
-                tk.Label(method_frame, bg=c).grid(row=3, column=i, sticky="ew")
-                i +=1"""
 
             method_row += 1
 
