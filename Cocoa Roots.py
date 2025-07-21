@@ -176,11 +176,11 @@ class Ticket:
 
 
 def save(window):
+    # condense data to one object to save
     file_data = {"ingredients": ingredients, "batches": batches, "tickets": tickets}
 
     with open(FILE_NAME, "wb") as file:
-        pickle.dump(file_data, file)
-        print(f"saving: {file_data}")
+        pickle.dump(file_data, file)  # save data to file
 
     window.destroy()
 
@@ -188,11 +188,9 @@ def save(window):
 def load():
     file = open(FILE_NAME, "rb")
     content = pickle.load(file)
-    print(f"loading: {content}")
-    print(list(content.keys()))
 
+    # if file content matches format
     if list(content.keys()) == ["ingredients", "batches", "tickets"]:
-        print("here")
         ingredients.update(content["ingredients"])
         batches.update(content["batches"])
         tickets.update(content["tickets"])
@@ -206,18 +204,21 @@ def load():
 class Window(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
+
+        # Call save function on closing tkinter window
         self.protocol("WM_DELETE_WINDOW", lambda: save(self))
-        load()
+        load()  # load file content
 
         self.logo = ImageTk.PhotoImage(Image.open("Resources/Bean_Logo.png"))
 
+        # adjust window features
         self.config(bg="blue")
         self.geometry("400x600")  # window dimensions
         self.title("Cocoa Roots")
         self.grid_columnconfigure(1, weight=1)  # make expandable with screen
         self.grid_rowconfigure(2, weight=1)
 
-        style = ttk.Style()
+        style = ttk.Style()  # set ttk style (to format scroll bars)
         style.theme_use('clam')
 
         # titlebar
@@ -230,6 +231,7 @@ class Window(tk.Tk):
         title_text = tk.Label(self.title_bar, text="Cocoa Roots", font=("Bernard MT Condensed", 25), bg=ORANGE)
         title_text.pack(side=tk.LEFT)
 
+        # Put content below titlebar
         content = Content(self)
         content.grid(row=2, column=1, sticky="nsew")
 
@@ -240,7 +242,8 @@ class Content(tk.Frame):
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
-        self.back_track = {}
+        self.back_track = {}  # keep track of page navigation
+        # place button in titlebar
         self.back_button = tk.Button(parent.title_bar,
                                      text="<",
                                      width=7,
@@ -264,26 +267,26 @@ class Content(tk.Frame):
         self.current_page = UserPage
         self.switch_page(UserPage)
 
-    def navigate(self, page_name):
+    def navigate(self, page_name):  # user navigation that records previous page
         self.back_track[page_name] = self.current_page
         self.switch_page(page_name)
 
-    def go_back(self):
+    def go_back(self):  # switches to previous page
         last_page = self.back_track[self.current_page]
         self.switch_page(last_page)
 
     def switch_page(self, page_name):
-        if page_name in self.back_track:
-            self.back_button.pack(padx=10, side=tk.RIGHT)
+        if page_name in self.back_track:  # if there is a page before current
+            self.back_button.pack(padx=10, side=tk.RIGHT)  # show back button
         else:
-            self.back_button.pack_forget()
+            self.back_button.pack_forget()  # hide back button
 
         self.current_page = page_name
         page = self.pages[page_name]
-        page.tkraise()
+        page.tkraise()  # bring frame to front (switch page)
 
 
-class UserPage(tk.Frame):
+class UserPage(tk.Frame):  # menu to select user type
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, bg=BACKGROUND, height=20, borderwidth=1, relief="solid")
         self.grid_rowconfigure(1, weight=1)
@@ -336,7 +339,7 @@ class WorkerPage(tk.Frame):
                                     )
         ingredient_frame.grid(row=1, column=1, padx=15, sticky="we")
 
-        ingredient_frame.grid_propagate(False)
+        ingredient_frame.grid_propagate(False)  # keep specified dimensions
         ingredient_frame.rowconfigure(1, weight=1)
         ingredient_frame.columnconfigure(1, weight=1)
 
@@ -365,7 +368,7 @@ class WorkerPage(tk.Frame):
                                  )
         batches_frame.grid(row=2, column=1, padx=15, sticky="nwe")
 
-        batches_frame.grid_propagate(False)
+        batches_frame.grid_propagate(False) # keep specified dimensions
         batches_frame.rowconfigure(1, weight=1)
         batches_frame.columnconfigure(1, weight=1)
 
@@ -386,7 +389,7 @@ class WorkerPage(tk.Frame):
 
         # __________ Existing Batches __________
 
-        content_frame = tk.Frame(self, bg=BLACK)
+        content_frame = tk.Frame(self, bg=BLACK)  # black frame to create boarder
         content_frame.grid(row=3, column=1, sticky="nsew", pady=(0, 20), padx=10)
 
         self.scroll_area = ScrollableBatches(content_frame, parent, "worker")
@@ -396,9 +399,9 @@ class WorkerPage(tk.Frame):
         instance = Batch()
         instance_ID = instance.ID
 
-        batches[instance_ID] = instance
-        self.scroll_area.update_batch_list()
-        self.parent.pages[ConsumerPage].scroll_area.update_batch_list()
+        batches[instance_ID] = instance  # add batch instance to dictionary
+        self.scroll_area.update_batch_list()  # reload worker page batch list
+        self.parent.pages[ConsumerPage].scroll_area.update_batch_list()  # reload user page batch list
 
 
 class ScrollableBatches(tk.Canvas):
