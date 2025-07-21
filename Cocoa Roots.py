@@ -175,20 +175,27 @@ class Ticket:
         ...
 
 
-def save():
+def save(window):
     file_data = {"ingredients": ingredients, "batches": batches, "tickets": tickets}
 
     with open(FILE_NAME, "wb") as file:
         pickle.dump(file_data, file)
+        print(f"saving: {file_data}")
+
+    window.destroy()
 
 
 def load():
     file = open(FILE_NAME, "rb")
     content = pickle.load(file)
+    print(f"loading: {content}")
+    print(list(content.keys()))
 
-    ingredients.update(content["ingredients"])
-    batches.update(content["batches"])
-    tickets.update(content["tickets"])
+    if list(content.keys()) == ["ingredients", "batches", "tickets"]:
+        print("here")
+        ingredients.update(content["ingredients"])
+        batches.update(content["batches"])
+        tickets.update(content["tickets"])
 
 
 # -----------------------------------------------------------------------------
@@ -199,6 +206,8 @@ def load():
 class Window(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
+        self.protocol("WM_DELETE_WINDOW", lambda: save(self))
+        load()
 
         self.logo = ImageTk.PhotoImage(Image.open("Resources/Bean_Logo.png"))
 
