@@ -5,6 +5,7 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 from datetime import datetime
 
+
 # lists of classes and objects
 # these associative arrays are global
 ingredients = {}
@@ -108,6 +109,19 @@ class Batch:
         self.log.append(record)
 
     def drying(self, start_dt, end_dt, temperature):
+
+        if not (start_dt and end_dt and temperature):
+            messagebox.showerror("Existence Error", "Please complete all fields")
+            return -1
+
+        try:
+            start_dt = datetime.strptime(start_dt, "%d-%m-%Y")
+            end_dt = datetime.strptime(end_dt, "%d-%m-%Y")
+
+        except ValueError:
+            messagebox.showerror("Type Error", "Date must be inputted in the format DD/MM/YYYY")
+            return -1
+
         duration = end_dt - start_dt
 
         record = {"process": "drying",
@@ -121,6 +135,17 @@ class Batch:
 
     def winnowing(self, date_time, weight_reduced):
 
+        if not (date_time and weight_reduced):
+            messagebox.showerror("Existence Error", "Please complete all fields")
+            return -1
+
+        try:
+            date_time = datetime.strptime(date_time, "%d-%m-%Y")
+
+        except ValueError:
+            messagebox.showerror("Type Error", "Date must be inputted in the format DD/MM/YYYY")
+            return -1
+
         if weight_reduced > self.total_weight:  # range check
             raise ValueError("weight reduced cannot be greater than total weight")
 
@@ -133,8 +158,20 @@ class Batch:
 
     def grinding(self, date_time, fineness):  # fineness in mm
 
+        if not (date_time and fineness):
+            messagebox.showerror("Existence Error", "Please complete all fields")
+            return -1
+
+        try:
+            date_time = datetime.strptime(date_time, "%d-%m-%Y")
+
+        except ValueError:
+            messagebox.showerror("Type Error", "Date must be inputted in the format DD/MM/YYYY")
+            return -1
+
         if fineness < 0:  # range check
-            raise ValueError("fineness cannot be less than zero")
+            messagebox.showerror("Type Error","Fineness cannot be less than zero")
+            return -1
 
         record = {"process": "grinding",
                   "fineness": fineness,
