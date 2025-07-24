@@ -368,7 +368,7 @@ class WorkerPage(tk.Frame):
                                  )
         batches_frame.grid(row=2, column=1, padx=15, sticky="nwe")
 
-        batches_frame.grid_propagate(False) # keep specified dimensions
+        batches_frame.grid_propagate(False)  # keep specified dimensions
         batches_frame.rowconfigure(1, weight=1)
         batches_frame.columnconfigure(1, weight=1)
 
@@ -412,7 +412,7 @@ class ScrollableBatches(tk.Canvas):
         self.parent = parent
         self.grandparent = grandparent
 
-        self.content = tk.Frame(self, bg=DARK_BLUE)
+        self.content = tk.Frame(self, bg=DARK_BLUE)  # main content area
 
         self.content.grid_columnconfigure(1, weight=1)
 
@@ -431,12 +431,12 @@ class ScrollableBatches(tk.Canvas):
         # __________ Content Stuff __________
         self.update_batch_list()
 
-    def update_batch_list(self):
-        for widget in self.content.winfo_children():
-            widget.destroy()
+    def update_batch_list(self):  # reload content in scrollbar
+        for widget in self.content.winfo_children():  # get all content children
+            widget.destroy()  # delete children
 
         batch_row = 1
-        for batch in batches.values():
+        for batch in batches.values():  # for every saved batch (list of classes)
             batch_frame = tk.Frame(self.content,
                                    bg=LIGHT_BLUE,
                                    borderwidth=1,
@@ -463,12 +463,13 @@ class ScrollableBatches(tk.Canvas):
 
     def navigate_batch(self, batch_ID):
 
-        if self.user_type == "worker":
+        if self.user_type == "worker":  # if scroll area in user section of GUI
             self.grandparent.navigate(WorkerBatchPage)
-            self.grandparent.pages[WorkerBatchPage].update_title(batch_ID)
-        else:
+            self.grandparent.pages[WorkerBatchPage].update_page(batch_ID)  # update page
+
+        elif self.user_type == "consumer":  # if scroll area in consumer section of GUI
             self.grandparent.navigate(ConsumerBatchPage)
-            self.grandparent.pages[ConsumerBatchPage].update_title(batch_ID)
+            self.grandparent.pages[ConsumerBatchPage].update_page(batch_ID)  # update page
 
 
 class ConsumerPage(tk.Frame):
@@ -500,7 +501,7 @@ class ConsumerPage(tk.Frame):
                                   )
         search_button.grid(row=1, column=2, padx=(0, 20), pady=(10, 0), ipady=3)
 
-        content_frame = tk.Frame(self, bg=BLACK)
+        content_frame = tk.Frame(self, bg=BLACK)  # black border frame
         content_frame.grid(row=3, column=1, sticky="nsew", padx=10)
 
         self.scroll_area = ScrollableBatches(content_frame, parent, "consumer")
@@ -516,8 +517,8 @@ class ConsumerBatchPage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
 
-        self.batch_ID = ""
-        self.logs = []
+        self.batch_ID = ""  # current batch
+        self.log_labels = []  # logs of applied processes to show consumer
 
         self.grid_columnconfigure(1, weight=1)
 
@@ -535,26 +536,27 @@ class ConsumerBatchPage(tk.Frame):
         title_frame.rowconfigure(1, weight=1)
         title_frame.columnconfigure(1, weight=1)
 
-        self.title_label = tk.Label(title_frame,
+        self.title_label = tk.Label(title_frame,  # to be updated when page is loaded
                                     bg=LIGHT_BLUE,
-                                    text="..."
+                                    text="..."  # show ... if no other title in loaded
                                     )
         self.title_label.grid(row=1, column=1)
 
         # __________ Page Content __________
 
-    def update_title(self, instance_ID):
-        self.batch_ID = instance_ID
+    def update_page(self, instance_ID):
+        self.batch_ID = instance_ID  # change page title
         self.title_label.config(text=instance_ID)
 
-        for widget in self.logs:
+        for widget in self.log_labels:  # clear content before reloading
             widget.destroy()
 
         row = 2
-        for process in batches[instance_ID].log:
-            process_label = tk.Label(self, text=str(process))
+        for process in batches[instance_ID].log:  # for every action taken in batch log
+            process_label = tk.Label(self, text=str(process))  # load each action as label to show consumer
             process_label.grid(row=row, column=1)
-            self.logs.append(process_label)
+
+            self.log_labels.append(process_label)
             row += 1
 
 
@@ -685,7 +687,7 @@ class WorkerBatchPage(tk.Frame):
         scroll_area = ScrollableBatchContent(content_frame, self)
         scroll_area.pack(expand=True, pady=3, padx=3)
 
-    def update_title(self, instance_ID):
+    def update_page(self, instance_ID):
         self.batch_ID = instance_ID
         self.title_label.config(text=instance_ID)
 
