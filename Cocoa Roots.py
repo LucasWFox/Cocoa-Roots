@@ -3,6 +3,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import messagebox
 from PIL import Image, ImageTk
+from datetime import datetime
 
 # lists of classes and objects
 # these associative arrays are global
@@ -79,6 +80,19 @@ class Batch:
         self.log.append(record)
 
     def fermentation(self, start_dt, end_dt, additive, amount):
+
+        if not (start_dt and end_dt and additive and amount):
+            messagebox.showerror("Existence Error", "Please complete all fields")
+            return -1
+
+        try:
+            start_dt = datetime.strptime(start_dt, "%d-%m-%Y")
+            end_dt = datetime.strptime(end_dt, "%d-%m-%Y")
+
+        except ValueError:
+            messagebox.showerror("Type Error", "Date must be inputted in the format DD/MM/YYYY")
+            return -1
+
         additive.reduce_amount(amount)
 
         duration = end_dt - start_dt
@@ -88,7 +102,7 @@ class Batch:
                   "amount": amount,
                   "start_dt": start_dt,
                   "end_dt": end_dt,
-                  "duration": duration
+                  "duration": duration.days
                   }
 
         self.log.append(record)
@@ -619,7 +633,7 @@ class IngredientPage(tk.Frame):
                                 bg=LIGHT_ORANGE,
                                 borderwidth=1,
                                 relief="solid",
-                                command=self.create_ingredient
+                                command=lambda: self.create_ingredient
                                 )
         back_button.grid(column=1, row=4, pady=20, padx=10)
 
@@ -628,23 +642,24 @@ class IngredientPage(tk.Frame):
         weight = self.weight_entry.get()
         source = self.source_entry.get()
 
+        if not (name and weight and source):
+            messagebox.showerror("Existence Error", "Please complete all fields")
+            return -1
+
         try:
             weight = float(weight)
 
         except ValueError:
             messagebox.showerror("Type Error", "Weight must be a number")
+            return -1
 
-        else:
-            if (not name) or (not weight) or (not source):
-                messagebox.showerror("Existence Error", "Please complete all fields")
+        if weight <= 0:
+            messagebox.showerror("Range Error", "Weight must be a positive number")
+            return -1
 
-            elif weight <= 0:
-                messagebox.showerror("Range Error", "Weight must be a positive number")
-
-            else:
-                instance = Ingredient(name, weight, source)
-                instance_ID = instance.ID
-                ingredients[instance_ID] = instance
+        instance = Ingredient(name, weight, source)
+        instance_ID = instance.ID
+        ingredients[instance_ID] = instance
 
 
 class WorkerBatchPage(tk.Frame):
