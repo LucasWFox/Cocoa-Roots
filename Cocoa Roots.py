@@ -320,7 +320,6 @@ class Batch:
             melting_temp = int(melting_temp)
             cooling_temp = int(cooling_temp)
             working_temp = int(working_temp)
-            molding_dimension = int(molding_dimension)
             weight_per_bar = int(weight_per_bar)
 
         except ValueError:
