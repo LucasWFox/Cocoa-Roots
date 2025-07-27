@@ -63,7 +63,7 @@ class Batch:
         self.ID = f"BAT-{Batch.ID_counter:03d}"  # Batch unique identifier
         Batch.ID_counter += 1
 
-        self.total_weight = 0
+        self.__total_weight = 0
 
         messagebox.showinfo("Notification", f"New Batch Created, ID: {self.ID}")
 
@@ -92,7 +92,7 @@ class Batch:
             return -1
 
         ingredient.reduce_amount(amount)
-        self.total_weight += amount
+        self.__total_weight += amount
 
         record = {"process": "add_ingredient",
                   "ingredient": ingredient,
@@ -186,7 +186,7 @@ class Batch:
             messagebox.showerror("Type Error", "Date must be inputted in the format DD/MM/YYYY")
             return -1
 
-        if weight_reduced > self.total_weight:  # range check
+        if weight_reduced > self.__total_weight:  # range check
             messagebox.showerror("Range Error", "Weight reduced cannot be greater than total weight")
             return -1
 
