@@ -59,11 +59,11 @@ class Batch:
 
     def __init__(self):
         self.__log = []  # list of every event occurred in batch
+        self.__total_weight = 0
+        self.__ingredients = {}
 
         self.ID = f"BAT-{Batch.ID_counter:03d}"  # Batch unique identifier
         Batch.ID_counter += 1
-
-        self.__total_weight = 0
 
         messagebox.showinfo("Notification", f"New Batch Created, ID: {self.ID}")
 
@@ -90,6 +90,9 @@ class Batch:
         if amount < 0:  # range check
             messagebox.showerror("Range Error", "Amount cannot be less than zero")
             return -1
+
+        #  increase ingredient amount or add ingredient to dict         V set value to 0 if ingredient not present
+        self.__ingredients[ingredient] = self.__ingredients.get(ingredient, 0) + amount
 
         ingredient.reduce_amount(amount)
         self.__total_weight += amount
@@ -128,6 +131,9 @@ class Batch:
             return -1
 
         additive.reduce_amount(amount)
+
+        #  increase ingredient amount or add ingredient to dict     V set value to 0 if additive not present
+        self.__ingredients[additive] = self.__ingredients.get(additive, 0) + amount
 
         duration = end_dt - start_dt
 
