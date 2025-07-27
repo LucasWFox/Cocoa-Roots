@@ -318,7 +318,7 @@ class Batch:
         return self.__log
 
 
-def save(window):
+def save():
     # condense data to one object to save
     file_data = {"ingredients": ingredients, "batches": batches,
                  "batch_ID_counter": Batch.ID_counter, "ingredient_ID_counter": Ingredient.ID_counter}
@@ -330,8 +330,14 @@ def save(window):
 
 
 def load():
-    file = open(FILE_NAME, "rb")
-    content = pickle.load(file)
+    try:
+        file = open(FILE_NAME, "rb")
+        content = pickle.load(file)
+
+    except FileNotFoundError:  # if file does not exist
+
+        open(FILE_NAME, "wb")  # create file
+        return -1  # finish load()
 
     # if file content matches format
     if list(content.keys()) == ["ingredients", "batches", "batch_ID_counter", "ingredient_ID_counter"]:
@@ -356,7 +362,7 @@ class Window(tk.Tk):
         tk.Tk.__init__(self, *args, **kwargs)
 
         # Call save function on closing tkinter window
-        self.protocol("WM_DELETE_WINDOW", lambda: save(self))
+        self.protocol("WM_DELETE_WINDOW", lambda: save())
         load()  # load file content
 
         self.logo = ImageTk.PhotoImage(Image.open("Resources/Bean_Logo.png"))
