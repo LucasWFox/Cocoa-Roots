@@ -87,9 +87,11 @@ class Ingredient:
 
         if calc_weight >= 0:  # range check
             self.weight = calc_weight
+            return 1
 
         elif calc_weight < 0:
             messagebox.showinfo("Notification", f"There is only {self.weight} of this ingredient")
+            return -1
 
 
 class Batch:
@@ -135,17 +137,20 @@ class Batch:
 
         ingredient = ingredients[ingredient_id]
 
+        e = ingredient.reduce_amount(amount)
+        if e == -1:  # if error
+            return -1
+
+        self.__total_weight += amount
+
         #  increase ingredient amount or add ingredient to dict
         #                              set value to 0 if ingredient not present   V
         self.__ingredients[ingredient_id] = self.__ingredients.get(ingredient_id, 0) + amount
 
-        ingredient.reduce_amount(amount)
-        self.__total_weight += amount
-
         record = {"process": "add_ingredient",
-                  "ingredient": ingredient,
+                  "ingredient": ingredient_id,
                   "amount": amount,
-                  "date": date
+                  "date": date.strftime("%d/%m/%Y")
                   }
 
         self.__log.append(record)
@@ -243,7 +248,7 @@ class Batch:
 
         record = {"process": "winnowing",
                   "weight_reduced": weight_reduced,
-                  "date": date,
+                  "date": date.strftime("%d/%m/%Y"),
                   }
 
         self.__log.append(record)
@@ -267,7 +272,7 @@ class Batch:
 
         record = {"process": "grinding",
                   "fineness": fineness,
-                  "date": date,
+                  "date": date.strftime("%d/%m/%Y"),
                   }
 
         self.__log.append(record)
@@ -294,7 +299,7 @@ class Batch:
 
         record = {"process": "conching",
                   "temperature": temperature,
-                  "date": date,
+                  "date": date.strftime("%d/%m/%Y"),
                   }
 
         self.__log.append(record)
@@ -333,7 +338,7 @@ class Batch:
                   "working_temp": working_temp,
                   "molding_dimension": molding_dimension,
                   "weight_per_bar": weight_per_bar,
-                  "date": date,
+                  "date": date.strftime("%d/%m/%Y"),
                   }
 
         self.__log.append(record)
@@ -353,7 +358,7 @@ class Batch:
 
         record = {"process": "finalise",
                   "verification_num": verification_num,
-                  "date": date,
+                  "date": date.strftime("%d/%m/%Y"),
                   }
 
         ...  # close ... write more
@@ -425,7 +430,7 @@ class Content(tk.Frame):
         self.pages = {}  # dictionary of sub-frames within content
 
         for page in [UserPage, WorkerPage, ConsumerPage, IngredientPage,
-                     WorkerBatchPage, ConsumerBatchPage]:  # for every page within content
+                     EditBatchPage, ViewBatchPage]:  # for every page within content
             page_class = page(parent=self)  # create frame class
 
             self.pages[page] = page_class
@@ -560,7 +565,7 @@ class WorkerPage(tk.Frame):
         content_frame = tk.Frame(self, bg=BLACK)  # black frame to create boarder
         content_frame.grid(row=3, column=1, sticky="nsew", pady=(0, 20), padx=10)
 
-        self.scroll_area = ScrollableBatches(content_frame, parent, "worker")
+        self.scroll_area = ScrollableBatchList(content_frame, parent, "worker")
         self.scroll_area.pack(fill="both", expand=True, pady=3, padx=3)
 
     def add_batch(self):
@@ -570,175 +575,6 @@ class WorkerPage(tk.Frame):
         batches[instance_id] = instance  # add batch instance to dictionary
         self.scroll_area.update_batch_list()  # reload worker page batch list
         self.parent.pages[ConsumerPage].scroll_area.update_batch_list()  # reload user page batch list
-
-
-class ScrollableBatches(tk.Canvas):
-    def __init__(self, parent, grandparent, user_type, **kwargs):
-        super().__init__(parent, bg=DARK_BLUE, **kwargs)
-
-        self.user_type = user_type
-        self.parent = parent
-        self.grandparent = grandparent
-
-        self.content = tk.Frame(self, bg=DARK_BLUE)  # main content area
-
-        self.content.grid_columnconfigure(1, weight=1)
-
-        # __________ Scrollbar Stuff __________
-        scroll_bar = ttk.Scrollbar(parent, orient="vertical", command=self.yview)
-        self.configure(yscrollcommand=scroll_bar.set)
-
-        scroll_bar.pack(side="right", fill="y")
-        self.pack(side="left", fill="both", expand=True)
-
-        self.window_id = self.create_window((0, 0), window=self.content, anchor="nw")
-
-        self.content.bind("<Configure>", lambda event: self.configure(scrollregion=self.bbox("all")))
-        self.bind("<Configure>", lambda event: self.itemconfig(self.window_id, width=event.width))
-
-        # __________ Content Stuff __________
-        self.update_batch_list()
-
-    def update_batch_list(self):  # reload content in scrollbar
-        for widget in self.content.winfo_children():  # get all content children
-            widget.destroy()  # delete children
-
-        batch_row = 1
-        for batch in batches.values():  # for every saved batch (list of classes)
-            batch_frame = tk.Frame(self.content,
-                                   bg=LIGHT_BLUE,
-                                   borderwidth=1,
-                                   relief="solid"
-                                   )
-            batch_frame.grid(row=batch_row, column=1, pady=10, sticky="we")
-
-            batch_frame.columnconfigure(3, weight=1)
-
-            batch_label = tk.Label(batch_frame,
-                                   bg=LIGHT_ORANGE,
-                                   text=batch.id
-                                   )
-            batch_label.grid(row=1, column=1, columnspan=2, sticky="w")
-
-            submit_button = tk.Button(batch_frame,
-                                      bg=LIGHT_ORANGE,
-                                      text=">",
-                                      padx=5,
-                                      command=lambda arg=batch.id: self.navigate_batch(arg)
-                                      )
-            submit_button.grid(row=1, column=4, sticky="e", padx=5)
-            batch_row += 1
-
-    def navigate_batch(self, batch_id):
-
-        if self.user_type == "worker":  # if scroll area in user section of GUI
-            self.grandparent.navigate(WorkerBatchPage)
-            self.grandparent.pages[WorkerBatchPage].update_page(batch_id)  # update page
-
-        elif self.user_type == "consumer":  # if scroll area in consumer section of GUI
-            self.grandparent.navigate(ConsumerBatchPage)
-            self.grandparent.pages[ConsumerBatchPage].update_page(batch_id)  # update page
-
-
-class ConsumerPage(tk.Frame):
-    def __init__(self, parent):
-        tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
-
-        self.parent = parent
-
-        self.search_icon = ImageTk.PhotoImage(Image.open("Resources/Search_entry.png").resize((30, 30)))
-
-        self.grid_columnconfigure(1, weight=1)
-
-        search_background = tk.Frame(self, bg=LIGHT_ORANGE, borderwidth=1, relief="solid")
-        search_background.grid(row=1, column=1, pady=20, ipady=5, padx=(15, 50), sticky="we")
-        search_background.grid_columnconfigure(1, weight=1)
-
-        self.search_bar = tk.Entry(search_background,
-                                   borderwidth=1,
-                                   relief="solid",
-                                   font=("Calabi", 12)
-                                   )
-        self.search_bar.grid(row=1, column=1, pady=(10, 0), ipady=7, padx=20, sticky="we")
-
-        search_button = tk.Button(search_background,
-                                  image=self.search_icon,
-                                  bg=LIGHT_ORANGE,
-                                  height=25,
-                                  borderwidth=1,
-                                  relief="ridge",
-                                  command=self.search
-                                  )
-        search_button.grid(row=1, column=2, padx=(0, 20), pady=(10, 0), ipady=3)
-
-        content_frame = tk.Frame(self, bg=BLACK)  # black border frame
-        content_frame.grid(row=3, column=1, sticky="nsew", padx=10)
-
-        self.scroll_area = ScrollableBatches(content_frame, parent, "consumer")
-        self.scroll_area.pack(fill="both", expand=True, pady=3, padx=3)
-
-    def search(self):
-        search_value = self.search_bar.get()
-
-        if not search_value:
-            messagebox.showerror("Existence Error", "Please enter batch id into the searchbar")
-            return -1
-
-        if search_value not in batches:
-            messagebox.showinfo("Batch not found", "Batch id was not found, please check id is in format BAT-000")
-            return -1
-
-        self.parent.navigate(ConsumerBatchPage)
-        self.parent.pages[ConsumerBatchPage].update_page(search_value)  # update page
-
-
-class ConsumerBatchPage(tk.Frame):
-    def __init__(self, parent):
-        tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
-
-        self.batch_id = ""  # current batch
-        self.log_labels = []  # logs of applied processes to show consumer
-
-        self.grid_columnconfigure(1, weight=1)
-
-        # __________ Page Title __________
-        title_frame = tk.Frame(self,
-                               bg=LIGHT_BLUE,
-                               height=50,
-                               width=50,
-                               borderwidth=1,
-                               relief="solid"
-                               )
-        title_frame.grid(row=1, column=1, padx=15, pady=10, sticky="we")
-
-        title_frame.grid_propagate(False)
-        title_frame.rowconfigure(1, weight=1)
-        title_frame.columnconfigure(1, weight=1)
-
-        self.title_label = tk.Label(title_frame,  # to be updated when page is loaded
-                                    bg=LIGHT_BLUE,
-                                    text="..."  # show ... if no other title in loaded
-                                    )
-        self.title_label.grid(row=1, column=1)
-
-        self.details_label = tk.Label()
-
-        # __________ Page Content __________
-
-    def update_page(self, instance_id):
-        self.batch_id = instance_id  # change page title
-        self.title_label.config(text=instance_id)
-
-        for widget in self.log_labels:  # clear content before reloading
-            widget.destroy()
-
-        row = 2
-        for process in batches[instance_id].get_log():  # for every action taken in batch log
-            process_label = tk.Label(self, text=str(process))  # load each action as label to show consumer
-            process_label.grid(row=row, column=1)
-
-            self.log_labels.append(process_label)
-            row += 1
 
 
 class IngredientPage(tk.Frame):
@@ -832,7 +668,7 @@ class IngredientPage(tk.Frame):
         print(ingredients)
 
 
-class WorkerBatchPage(tk.Frame):
+class EditBatchPage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
 
@@ -869,7 +705,7 @@ class WorkerBatchPage(tk.Frame):
         content_frame = tk.Frame(self, bg=BLACK)
         content_frame.grid(row=2, column=1, sticky="nsew", pady=10, padx=10)
 
-        scroll_area = ScrollableBatchContent(content_frame, self)
+        scroll_area = ScrollableBatchFunctions(content_frame, self)
         scroll_area.pack(expand=True, pady=3, padx=3)
 
     def update_page(self, instance_id):
@@ -889,7 +725,7 @@ class WorkerBatchPage(tk.Frame):
         method_func(**kwargs)
 
 
-class ScrollableBatchContent(tk.Canvas):
+class ScrollableBatchFunctions(tk.Canvas):
     def __init__(self, location, parent):
         tk.Canvas.__init__(self, location, bg=DARK_BLUE)
 
@@ -960,6 +796,177 @@ class ScrollableBatchContent(tk.Canvas):
             parent.method_entries[method_str] = parameter_entries
 
             method_row += 1
+
+
+class ConsumerPage(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
+
+        self.parent = parent
+
+        self.search_icon = ImageTk.PhotoImage(Image.open("Resources/Search_entry.png").resize((30, 30)))
+
+        self.grid_columnconfigure(1, weight=1)
+
+        search_background = tk.Frame(self, bg=LIGHT_ORANGE, borderwidth=1, relief="solid")
+        search_background.grid(row=1, column=1, pady=20, ipady=5, padx=(15, 50), sticky="we")
+        search_background.grid_columnconfigure(1, weight=1)
+
+        self.search_bar = tk.Entry(search_background,
+                                   borderwidth=1,
+                                   relief="solid",
+                                   font=("Calabi", 12)
+                                   )
+        self.search_bar.grid(row=1, column=1, pady=(10, 0), ipady=7, padx=20, sticky="we")
+
+        search_button = tk.Button(search_background,
+                                  image=self.search_icon,
+                                  bg=LIGHT_ORANGE,
+                                  height=25,
+                                  borderwidth=1,
+                                  relief="ridge",
+                                  command=self.search
+                                  )
+        search_button.grid(row=1, column=2, padx=(0, 20), pady=(10, 0), ipady=3)
+
+        content_frame = tk.Frame(self, bg=BLACK)  # black border frame
+        content_frame.grid(row=3, column=1, sticky="nsew", padx=10)
+
+        self.scroll_area = ScrollableBatchList(content_frame, parent, "consumer")
+        self.scroll_area.pack(fill="both", expand=True, pady=3, padx=3)
+
+    def search(self):
+        search_value = self.search_bar.get()
+
+        if not search_value:
+            messagebox.showerror("Existence Error", "Please enter batch id into the searchbar")
+            return -1
+
+        if search_value not in batches:
+            messagebox.showinfo("Batch not found", "Batch id was not found, please check id is in format BAT-000")
+            return -1
+
+        self.parent.navigate(ViewBatchPage)
+        self.parent.pages[ViewBatchPage].update_page(search_value)  # update page
+
+
+class ViewBatchPage(tk.Frame):
+    def __init__(self, parent):
+        tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
+
+        self.batch_id = ""  # current batch
+        self.log_labels = []  # logs of applied processes to show consumer
+
+        self.grid_columnconfigure(1, weight=1)
+
+        # __________ Page Title __________
+        title_frame = tk.Frame(self,
+                               bg=LIGHT_BLUE,
+                               height=50,
+                               width=50,
+                               borderwidth=1,
+                               relief="solid"
+                               )
+        title_frame.grid(row=1, column=1, padx=15, pady=10, sticky="we")
+
+        title_frame.grid_propagate(False)
+        title_frame.rowconfigure(1, weight=1)
+        title_frame.columnconfigure(1, weight=1)
+
+        self.title_label = tk.Label(title_frame,  # to be updated when page is loaded
+                                    bg=LIGHT_BLUE,
+                                    text="..."  # show ... if no other title in loaded
+                                    )
+        self.title_label.grid(row=1, column=1)
+
+        self.details_label = tk.Label()
+
+        # __________ Page Content __________
+
+    def update_page(self, instance_id):
+        self.batch_id = instance_id  # change page title
+        self.title_label.config(text=instance_id)
+
+        for widget in self.log_labels:  # clear content before reloading
+            widget.destroy()
+
+        row = 2
+        for process in batches[instance_id].get_log():  # for every action taken in batch log
+            for key in process.keys():
+                # load each action as label to show consumer
+                process_label = tk.Label(self, bg=LIGHT_BLUE, text=f"{key}: {process[key]}")
+                process_label.grid(row=row, column=1)
+
+                self.log_labels.append(process_label)
+                row += 1
+
+
+class ScrollableBatchList(tk.Canvas):
+    def __init__(self, parent, grandparent, user_type, **kwargs):
+        super().__init__(parent, bg=DARK_BLUE, **kwargs)
+
+        self.user_type = user_type
+        self.parent = parent
+        self.grandparent = grandparent
+
+        self.content = tk.Frame(self, bg=DARK_BLUE)  # main content area
+
+        self.content.grid_columnconfigure(1, weight=1)
+
+        # __________ Scrollbar Stuff __________
+        scroll_bar = ttk.Scrollbar(parent, orient="vertical", command=self.yview)
+        self.configure(yscrollcommand=scroll_bar.set)
+
+        scroll_bar.pack(side="right", fill="y")
+        self.pack(side="left", fill="both", expand=True)
+
+        self.window_id = self.create_window((0, 0), window=self.content, anchor="nw")
+
+        self.content.bind("<Configure>", lambda event: self.configure(scrollregion=self.bbox("all")))
+        self.bind("<Configure>", lambda event: self.itemconfig(self.window_id, width=event.width))
+
+        # __________ Content Stuff __________
+        self.update_batch_list()
+
+    def update_batch_list(self):  # reload content in scrollbar
+        for widget in self.content.winfo_children():  # get all content children
+            widget.destroy()  # delete children
+
+        batch_row = 1
+        for batch in batches.values():  # for every saved batch (list of classes)
+            batch_frame = tk.Frame(self.content,
+                                   bg=LIGHT_BLUE,
+                                   borderwidth=1,
+                                   relief="solid"
+                                   )
+            batch_frame.grid(row=batch_row, column=1, pady=10, sticky="we")
+
+            batch_frame.columnconfigure(3, weight=1)
+
+            batch_label = tk.Label(batch_frame,
+                                   bg=LIGHT_ORANGE,
+                                   text=batch.id
+                                   )
+            batch_label.grid(row=1, column=1, columnspan=2, sticky="w")
+
+            submit_button = tk.Button(batch_frame,
+                                      bg=LIGHT_ORANGE,
+                                      text=">",
+                                      padx=5,
+                                      command=lambda arg=batch.id: self.navigate_batch(arg)
+                                      )
+            submit_button.grid(row=1, column=4, sticky="e", padx=5)
+            batch_row += 1
+
+    def navigate_batch(self, batch_id):
+
+        if self.user_type == "worker":  # if scroll area in user section of GUI
+            self.grandparent.navigate(EditBatchPage)
+            self.grandparent.pages[EditBatchPage].update_page(batch_id)  # update page
+
+        elif self.user_type == "consumer":  # if scroll area in consumer section of GUI
+            self.grandparent.navigate(ViewBatchPage)
+            self.grandparent.pages[ViewBatchPage].update_page(batch_id)  # update page
 
 
 window = Window()
