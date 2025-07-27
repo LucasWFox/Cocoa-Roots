@@ -70,8 +70,6 @@ class Ingredient:
     id_counter = {}
 
     def __init__(self, name, weight, source):
-        self.log = []  # list of every event occurred in ingredient
-
         code = name[:3].upper()
         code_counter = Ingredient.id_counter.get(code, 1)
 
@@ -85,13 +83,16 @@ class Ingredient:
     def reduce_amount(self, amount):
         calc_weight = self.weight - amount
 
-        if calc_weight >= 0:  # range check
+        if calc_weight > 0:  # range check
             self.weight = calc_weight
             return 1
 
         elif calc_weight < 0:
             messagebox.showinfo("Notification", f"There is only {self.weight} of this ingredient")
             return -1
+
+        else:
+            del ingredients[self.id]
 
 
 class Batch:
@@ -662,7 +663,6 @@ class IngredientPage(tk.Frame):
         ingredients[instance_id] = instance
 
         messagebox.showinfo("Notification", f"New Ingredient Added, id: {instance_id}")
-        print(ingredients)
 
 
 class EditBatchPage(tk.Frame):
@@ -702,12 +702,17 @@ class EditBatchPage(tk.Frame):
         content_frame = tk.Frame(self, bg=BLACK)
         content_frame.grid(row=2, column=1, sticky="nsew", pady=10, padx=10)
 
-        scroll_area = ScrollableBatchFunctions(content_frame, self)
-        scroll_area.pack(expand=True, pady=3, padx=3)
+        self.scroll_area = ScrollableBatchFunctions(content_frame, self)
+        self.scroll_area.pack(expand=True, pady=3, padx=3)
 
     def update_page(self, instance_id):
         self.batch_id = instance_id
         self.title_label.config(text=instance_id)
+
+        self.scroll_area.notification_text = ("ID                               Weight\n"
+                                              "----------------------------------------")
+        for ingredient in ingredients.values():
+            self.scroll_area.notification_text += f"\n{ingredient.id}:             {ingredient.weight}"
 
     def alter_batch(self, method_str):
         method_func = getattr(batches[self.batch_id], method_str)
@@ -719,7 +724,7 @@ class EditBatchPage(tk.Frame):
         for parameter in method_entries:
             kwargs[parameter] = method_entries[parameter].get()
 
-        method_func(**kwargs)
+        return method_func(**kwargs)
 
 
 class ScrollableBatchFunctions(tk.Canvas):
@@ -779,6 +784,19 @@ class ScrollableBatchFunctions(tk.Canvas):
                                       )
             submit_button.grid(row=1, column=4, sticky="e", padx=5)
 
+            if method_str == "add_ingredient":
+                self.notification_text = ("ID                               Weight\n"
+                                          "----------------------------------------")
+
+                ingredients_button = tk.Button(method_frame,
+                                               bg=LIGHT_ORANGE,
+                                               text="ingredients",
+                                               padx=5,
+                                               command=lambda: messagebox.showinfo("Notification",
+                                                                                   self.notification_text)
+                                               )
+                ingredients_button.grid(row=1, column=3, sticky="e", padx=5)
+
             parameter_entries = {}
             row = 2
             for parameter in parameters:
@@ -797,9 +815,12 @@ class ScrollableBatchFunctions(tk.Canvas):
             method_row += 1
 
     def submit(self, method_str):
-        self.parent.alter_batch(method_str)
-        for widget in self.parent.method_entries[method_str].values():
-            widget.delete(0, tk.END)  # clear text from affected entries
+        e = self.parent.alter_batch(method_str)
+        if not e == -1:
+            for widget in self.parent.method_entries[method_str].values():
+                widget.delete(0, tk.END)  # clear text from affected entries
+
+        self.parent.update_page(self.parent.batch_id)
 
 
 class ConsumerPage(tk.Frame):
