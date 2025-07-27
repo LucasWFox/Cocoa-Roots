@@ -9,7 +9,6 @@ from datetime import datetime
 # these associative arrays are global
 ingredients = {}
 batches = {}
-tickets = {}
 
 FILE_NAME = "data.pkl"
 
@@ -318,22 +317,10 @@ class Batch:
     def get_log(self):
         return self.__log
 
-    def make_ticket(self):
-
-        ...
-
-
-class Ticket:
-    def __init__(self):
-        self.ID = ""
-
-    def access_ticket(self):
-        ...
-
 
 def save(window):
     # condense data to one object to save
-    file_data = {"ingredients": ingredients, "batches": batches, "tickets": tickets,
+    file_data = {"ingredients": ingredients, "batches": batches,
                  "batch_ID_counter": Batch.ID_counter, "ingredient_ID_counter": Ingredient.ID_counter}
 
     with open(FILE_NAME, "wb") as file:
@@ -347,12 +334,10 @@ def load():
     content = pickle.load(file)
 
     # if file content matches format
-    if list(content.keys()) == ["ingredients", "batches", "tickets",
-                                "batch_ID_counter", "ingredient_ID_counter"]:
+    if list(content.keys()) == ["ingredients", "batches", "batch_ID_counter", "ingredient_ID_counter"]:
 
         ingredients.update(content["ingredients"])
         batches.update(content["batches"])
-        tickets.update(content["tickets"])
 
         Batch.ID_counter = content["batch_ID_counter"]
         Ingredient.ID_counter = content["ingredient_ID_counter"]
