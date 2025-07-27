@@ -25,23 +25,62 @@ ERROR_GREEN = "#46F274"  # This colour should only be on hidden elements
 
 
 # -----------------------------------------------------------------------------
-# FUNCTIONALITY
+# SAVE AND LOAD
+# -----------------------------------------------------------------------------
+
+def save():
+    # condense data to one object to save
+    file_data = {"ingredients": ingredients, "batches": batches,
+                 "batch_id_counter": Batch.id_counter, "ingredient_id_counter": Ingredient.id_counter}
+
+    with open(FILE_NAME, "wb") as file:
+        pickle.dump(file_data, file)  # save data to file
+
+    window.destroy()
+
+
+def load():
+    try:
+        file = open(FILE_NAME, "rb")
+        content = pickle.load(file)
+
+    except FileNotFoundError:  # if file does not exist
+
+        open(FILE_NAME, "wb")  # create file
+        return -1  # finish load()
+
+    # if file content matches format
+    if list(content.keys()) == ["ingredients", "batches", "batch_id_counter", "ingredient_id_counter"]:
+
+        ingredients.update(content["ingredients"])
+        batches.update(content["batches"])
+
+        Batch.id_counter = content["batch_id_counter"]
+        Ingredient.id_counter = content["ingredient_id_counter"]
+
+    else:
+        messagebox.showerror("Import Error", "There was an error loading content")
+
+
+# -----------------------------------------------------------------------------
+# CLASS FUNCTIONALITY
 # -----------------------------------------------------------------------------
 
 class Ingredient:
-    id_counter = 1
+    id_counter = {}
 
     def __init__(self, name, weight, source):
         self.log = []  # list of every event occurred in ingredient
 
-        self.id = f"ING-{Ingredient.id_counter:03d}-{name[:3].upper()}"  # ingredient unique identifier
-        Ingredient.id_counter += 1
+        code = name[:3].upper()
+        code_counter = Ingredient.id_counter.get(code, 1)
+
+        self.id = f"ING-{code}-{code_counter:03d}"  # ingredient unique identifier
+        Ingredient.id_counter[code] = code_counter + 1
 
         self.name = name  # common name of batch
         self.weight = weight
         self.source = source  # name of ingredient suppler
-
-        messagebox.showinfo("Notification", f"New Ingredient Added, id: {self.id}")
 
     def reduce_amount(self, amount):
         calc_weight = self.weight - amount
@@ -50,7 +89,7 @@ class Ingredient:
             self.weight = calc_weight
 
         elif calc_weight < 0:
-            raise ValueError(f"There is only {self.weight} grams of this ingredient")
+            messagebox.showinfo("Notification", f"There is only {self.weight} of this ingredient")
 
 
 class Batch:
@@ -323,40 +362,6 @@ class Batch:
 
     def get_log(self):
         return self.__log
-
-
-def save():
-    # condense data to one object to save
-    file_data = {"ingredients": ingredients, "batches": batches,
-                 "batch_id_counter": Batch.id_counter, "ingredient_id_counter": Ingredient.id_counter}
-
-    with open(FILE_NAME, "wb") as file:
-        pickle.dump(file_data, file)  # save data to file
-
-    window.destroy()
-
-
-def load():
-    try:
-        file = open(FILE_NAME, "rb")
-        content = pickle.load(file)
-
-    except FileNotFoundError:  # if file does not exist
-
-        open(FILE_NAME, "wb")  # create file
-        return -1  # finish load()
-
-    # if file content matches format
-    if list(content.keys()) == ["ingredients", "batches", "batch_id_counter", "ingredient_id_counter"]:
-
-        ingredients.update(content["ingredients"])
-        batches.update(content["batches"])
-
-        Batch.id_counter = content["batch_id_counter"]
-        Ingredient.id_counter = content["ingredient_id_counter"]
-
-    else:
-        messagebox.showerror("Import Error", "There was an error loading content")
 
 
 # -----------------------------------------------------------------------------
@@ -795,7 +800,7 @@ class IngredientPage(tk.Frame):
                                 bg=LIGHT_ORANGE,
                                 borderwidth=1,
                                 relief="solid",
-                                command=lambda: self.create_ingredient
+                                command=lambda: self.create_ingredient()
                                 )
         back_button.grid(column=1, row=4, pady=20, padx=10)
 
@@ -822,6 +827,9 @@ class IngredientPage(tk.Frame):
         instance = Ingredient(name, weight, source)
         instance_id = instance.id
         ingredients[instance_id] = instance
+
+        messagebox.showinfo("Notification", f"New Ingredient Added, id: {instance_id}")
+        print(ingredients)
 
 
 class WorkerBatchPage(tk.Frame):
