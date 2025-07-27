@@ -29,19 +29,19 @@ ERROR_GREEN = "#46F274"  # This colour should only be on hidden elements
 # -----------------------------------------------------------------------------
 
 class Ingredient:
-    ID_counter = 1
+    id_counter = 1
 
     def __init__(self, name, weight, source):
         self.log = []  # list of every event occurred in ingredient
 
-        self.ID = f"ING-{Ingredient.ID_counter:03d}-{name[:3].upper()}"  # ingredient unique identifier
-        Ingredient.ID_counter += 1
+        self.id = f"ING-{Ingredient.id_counter:03d}-{name[:3].upper()}"  # ingredient unique identifier
+        Ingredient.id_counter += 1
 
         self.name = name  # common name of batch
         self.weight = weight
         self.source = source  # name of ingredient suppler
 
-        messagebox.showinfo("Notification", f"New Ingredient Added, ID: {self.ID}")
+        messagebox.showinfo("Notification", f"New Ingredient Added, id: {self.id}")
 
     def reduce_amount(self, amount):
         calc_weight = self.weight - amount
@@ -54,21 +54,21 @@ class Ingredient:
 
 
 class Batch:
-    ID_counter = 1
+    id_counter = 1
 
     def __init__(self):
         self.__log = []  # list of every event occurred in batch
         self.__total_weight = 0
         self.__ingredients = {}
 
-        self.ID = f"BAT-{Batch.ID_counter:03d}"  # Batch unique identifier
-        Batch.ID_counter += 1
+        self.id = f"BAT-{Batch.id_counter:03d}"  # Batch unique identifier
+        Batch.id_counter += 1
 
-        messagebox.showinfo("Notification", f"New Batch Created, ID: {self.ID}")
+        messagebox.showinfo("Notification", f"New Batch Created, id: {self.id}")
 
-    def add_ingredient(self, date_time, ingredient, amount):
+    def add_ingredient(self, date_time, ingredient_id, amount):
 
-        if not (date_time and ingredient and amount):
+        if not (date_time and ingredient_id and amount):
             messagebox.showerror("Existence Error", "Please complete all fields")
             return -1
 
@@ -90,8 +90,15 @@ class Batch:
             messagebox.showerror("Range Error", "Amount cannot be less than zero")
             return -1
 
-        #  increase ingredient amount or add ingredient to dict         V set value to 0 if ingredient not present
-        self.__ingredients[ingredient] = self.__ingredients.get(ingredient, 0) + amount
+        if ingredient_id not in ingredients:
+            messagebox.showinfo("Not Found", "Ingredient ID was not found, please check ID is in format ING-000-AAA")
+            return -1
+        
+        ingredient = ingredients[ingredient_id]
+        
+        #  increase ingredient amount or add ingredient to dict
+        #                              set value to 0 if ingredient not present   V
+        self.__ingredients[ingredient_id] = self.__ingredients.get(ingredient_id, 0) + amount
 
         ingredient.reduce_amount(amount)
         self.__total_weight += amount
@@ -321,7 +328,7 @@ class Batch:
 def save():
     # condense data to one object to save
     file_data = {"ingredients": ingredients, "batches": batches,
-                 "batch_ID_counter": Batch.ID_counter, "ingredient_ID_counter": Ingredient.ID_counter}
+                 "batch_id_counter": Batch.id_counter, "ingredient_id_counter": Ingredient.id_counter}
 
     with open(FILE_NAME, "wb") as file:
         pickle.dump(file_data, file)  # save data to file
@@ -340,13 +347,13 @@ def load():
         return -1  # finish load()
 
     # if file content matches format
-    if list(content.keys()) == ["ingredients", "batches", "batch_ID_counter", "ingredient_ID_counter"]:
+    if list(content.keys()) == ["ingredients", "batches", "batch_id_counter", "ingredient_id_counter"]:
 
         ingredients.update(content["ingredients"])
         batches.update(content["batches"])
 
-        Batch.ID_counter = content["batch_ID_counter"]
-        Ingredient.ID_counter = content["ingredient_ID_counter"]
+        Batch.id_counter = content["batch_id_counter"]
+        Ingredient.id_counter = content["ingredient_id_counter"]
 
     else:
         messagebox.showerror("Import Error", "There was an error loading content")
@@ -476,7 +483,7 @@ class WorkerPage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
 
-        self.batch_ID = ""
+        self.batch_id = ""
         self.parent = parent
 
         self.grid_rowconfigure(1, weight=1)
@@ -553,9 +560,9 @@ class WorkerPage(tk.Frame):
 
     def add_batch(self):
         instance = Batch()
-        instance_ID = instance.ID
+        instance_id = instance.id
 
-        batches[instance_ID] = instance  # add batch instance to dictionary
+        batches[instance_id] = instance  # add batch instance to dictionary
         self.scroll_area.update_batch_list()  # reload worker page batch list
         self.parent.pages[ConsumerPage].scroll_area.update_batch_list()  # reload user page batch list
 
@@ -604,7 +611,7 @@ class ScrollableBatches(tk.Canvas):
 
             batch_label = tk.Label(batch_frame,
                                    bg=LIGHT_ORANGE,
-                                   text=batch.ID
+                                   text=batch.id
                                    )
             batch_label.grid(row=1, column=1, columnspan=2, sticky="w")
 
@@ -612,20 +619,20 @@ class ScrollableBatches(tk.Canvas):
                                       bg=LIGHT_ORANGE,
                                       text=">",
                                       padx=5,
-                                      command=lambda arg=batch.ID: self.navigate_batch(arg)
+                                      command=lambda arg=batch.id: self.navigate_batch(arg)
                                       )
             submit_button.grid(row=1, column=4, sticky="e", padx=5)
             batch_row += 1
 
-    def navigate_batch(self, batch_ID):
+    def navigate_batch(self, batch_id):
 
         if self.user_type == "worker":  # if scroll area in user section of GUI
             self.grandparent.navigate(WorkerBatchPage)
-            self.grandparent.pages[WorkerBatchPage].update_page(batch_ID)  # update page
+            self.grandparent.pages[WorkerBatchPage].update_page(batch_id)  # update page
 
         elif self.user_type == "consumer":  # if scroll area in consumer section of GUI
             self.grandparent.navigate(ConsumerBatchPage)
-            self.grandparent.pages[ConsumerBatchPage].update_page(batch_ID)  # update page
+            self.grandparent.pages[ConsumerBatchPage].update_page(batch_id)  # update page
 
 
 class ConsumerPage(tk.Frame):
@@ -669,11 +676,11 @@ class ConsumerPage(tk.Frame):
         search_value = self.search_bar.get()
 
         if not search_value:
-            messagebox.showerror("Existence Error", "Please enter batch ID into the searchbar")
+            messagebox.showerror("Existence Error", "Please enter batch id into the searchbar")
             return -1
 
         if search_value not in batches:
-            messagebox.showinfo("Batch not found", "Batch ID was not found, please check ID is in format BAT-000")
+            messagebox.showinfo("Batch not found", "Batch id was not found, please check id is in format BAT-000")
             return -1
 
         self.parent.navigate(ConsumerBatchPage)
@@ -684,7 +691,7 @@ class ConsumerBatchPage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
 
-        self.batch_ID = ""  # current batch
+        self.batch_id = ""  # current batch
         self.log_labels = []  # logs of applied processes to show consumer
 
         self.grid_columnconfigure(1, weight=1)
@@ -713,15 +720,15 @@ class ConsumerBatchPage(tk.Frame):
 
         # __________ Page Content __________
 
-    def update_page(self, instance_ID):
-        self.batch_ID = instance_ID  # change page title
-        self.title_label.config(text=instance_ID)
+    def update_page(self, instance_id):
+        self.batch_id = instance_id  # change page title
+        self.title_label.config(text=instance_id)
 
         for widget in self.log_labels:  # clear content before reloading
             widget.destroy()
 
         row = 2
-        for process in batches[instance_ID].get_log():  # for every action taken in batch log
+        for process in batches[instance_id].get_log():  # for every action taken in batch log
             process_label = tk.Label(self, text=str(process))  # load each action as label to show consumer
             process_label.grid(row=row, column=1)
 
@@ -813,15 +820,15 @@ class IngredientPage(tk.Frame):
             return -1
 
         instance = Ingredient(name, weight, source)
-        instance_ID = instance.ID
-        ingredients[instance_ID] = instance
+        instance_id = instance.id
+        ingredients[instance_id] = instance
 
 
 class WorkerBatchPage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
 
-        self.batch_ID = ""
+        self.batch_id = ""
 
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, weight=3)
@@ -857,12 +864,12 @@ class WorkerBatchPage(tk.Frame):
         scroll_area = ScrollableBatchContent(content_frame, self)
         scroll_area.pack(expand=True, pady=3, padx=3)
 
-    def update_page(self, instance_ID):
-        self.batch_ID = instance_ID
-        self.title_label.config(text=instance_ID)
+    def update_page(self, instance_id):
+        self.batch_id = instance_id
+        self.title_label.config(text=instance_id)
 
     def alter_batch(self, method_str):
-        method_func = getattr(batches[self.batch_ID], method_str)
+        method_func = getattr(batches[self.batch_id], method_str)
 
         method_entries = self.method_entries[method_str]
 
@@ -897,7 +904,7 @@ class ScrollableBatchContent(tk.Canvas):
         # __________ Content Stuff __________
         self.batch_methods = [method for method in dir(Batch)
                               if method[:2] != "__"
-                              and method not in ["ID_counter", "save"]
+                              and method not in ["id_counter", "save"]
                               ]
 
         method_row = 2
