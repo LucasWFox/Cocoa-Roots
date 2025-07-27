@@ -58,7 +58,7 @@ class Batch:
     ID_counter = 1
 
     def __init__(self):
-        self.log = []  # list of every event occurred in batch
+        self.__log = []  # list of every event occurred in batch
 
         self.ID = f"BAT-{Batch.ID_counter:03d}"  # Batch unique identifier
         Batch.ID_counter += 1
@@ -100,7 +100,7 @@ class Batch:
                   "date_time": date_time
                   }
 
-        self.log.append(record)
+        self.__log.append(record)
 
     def fermentation(self, start_dt, end_dt, additive, amount):
 
@@ -139,7 +139,7 @@ class Batch:
                   "duration": duration.days
                   }
 
-        self.log.append(record)
+        self.__log.append(record)
 
     def drying(self, start_dt, end_dt, temperature):
 
@@ -171,7 +171,7 @@ class Batch:
                   "duration": duration.days
                   }
 
-        self.log.append(record)
+        self.__log.append(record)
 
     def winnowing(self, date_time, weight_reduced):
 
@@ -195,7 +195,7 @@ class Batch:
                   "date_time": date_time,
                   }
 
-        self.log.append(record)
+        self.__log.append(record)
 
     def grinding(self, date_time, fineness):  # fineness in mm
 
@@ -219,7 +219,7 @@ class Batch:
                   "date_time": date_time,
                   }
 
-        self.log.append(record)
+        self.__log.append(record)
 
     def conching(self, date_time, temperature):
 
@@ -246,7 +246,7 @@ class Batch:
                   "date_time": date_time,
                   }
 
-        self.log.append(record)
+        self.__log.append(record)
 
     def tempering_molding(self, date_time, melting_temp, cooling_temp, working_temp, molding_dimension, weight_per_bar):
 
@@ -285,7 +285,7 @@ class Batch:
                   "date_time": date_time,
                   }
 
-        self.log.append(record)
+        self.__log.append(record)
 
     def finalise(self, date_time, verification_num):
 
@@ -307,7 +307,10 @@ class Batch:
 
         ...  # close ... write more
 
-        self.log.append(record)
+        self.__log.append(record)
+
+    def get_log(self):
+        return self.__log
 
     def make_ticket(self):
 
@@ -665,7 +668,7 @@ class ConsumerPage(tk.Frame):
 
     def search(self):
         for batch in batches.values():
-            print(batch.log)
+            print(batch.get_log())
         print("search", self.info)
 
 
@@ -708,7 +711,7 @@ class ConsumerBatchPage(tk.Frame):
             widget.destroy()
 
         row = 2
-        for process in batches[instance_ID].log:  # for every action taken in batch log
+        for process in batches[instance_ID].get_log():  # for every action taken in batch log
             process_label = tk.Label(self, text=str(process))  # load each action as label to show consumer
             process_label.grid(row=row, column=1)
 
