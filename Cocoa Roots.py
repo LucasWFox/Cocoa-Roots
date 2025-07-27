@@ -726,6 +726,8 @@ class ScrollableBatchFunctions(tk.Canvas):
     def __init__(self, location, parent):
         tk.Canvas.__init__(self, location, bg=DARK_BLUE)
 
+        self.parent = parent
+
         self.content = tk.Frame(self, bg=DARK_BLUE)
 
         self.content.grid_columnconfigure(1, weight=1)
@@ -745,7 +747,7 @@ class ScrollableBatchFunctions(tk.Canvas):
         # __________ Content Stuff __________
         self.batch_methods = [method for method in dir(Batch)
                               if method[:2] != "__"
-                              and method not in ["id_counter", "save"]
+                              and not method == "id_counter"
                               ]
 
         method_row = 2
@@ -773,7 +775,7 @@ class ScrollableBatchFunctions(tk.Canvas):
                                       bg=LIGHT_ORANGE,
                                       text="Submit",
                                       padx=5,
-                                      command=lambda arg=method_str: parent.alter_batch(arg)
+                                      command=lambda arg=method_str: self.submit(arg)
                                       )
             submit_button.grid(row=1, column=4, sticky="e", padx=5)
 
@@ -793,6 +795,11 @@ class ScrollableBatchFunctions(tk.Canvas):
             parent.method_entries[method_str] = parameter_entries
 
             method_row += 1
+
+    def submit(self, method_str):
+        self.parent.alter_batch(method_str)
+        for widget in self.parent.method_entries[method_str].values():
+            widget.delete(0, tk.END)  # clear text from affected entries
 
 
 class ConsumerPage(tk.Frame):
