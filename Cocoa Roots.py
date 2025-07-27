@@ -632,6 +632,8 @@ class ConsumerPage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
 
+        self.parent = parent
+
         self.search_icon = ImageTk.PhotoImage(Image.open("Resources/Search_entry.png").resize((30, 30)))
 
         self.grid_columnconfigure(1, weight=1)
@@ -640,12 +642,12 @@ class ConsumerPage(tk.Frame):
         search_background.grid(row=1, column=1, pady=20, ipady=5, padx=(15, 50), sticky="we")
         search_background.grid_columnconfigure(1, weight=1)
 
-        search_bar = tk.Entry(search_background,
-                              borderwidth=1,
-                              relief="solid",
-                              font=("Calabi", 12)
-                              )
-        search_bar.grid(row=1, column=1, pady=(10, 0), ipady=7, padx=20, sticky="we")
+        self.search_bar = tk.Entry(search_background,
+                                   borderwidth=1,
+                                   relief="solid",
+                                   font=("Calabi", 12)
+                                   )
+        self.search_bar.grid(row=1, column=1, pady=(10, 0), ipady=7, padx=20, sticky="we")
 
         search_button = tk.Button(search_background,
                                   image=self.search_icon,
@@ -664,9 +666,18 @@ class ConsumerPage(tk.Frame):
         self.scroll_area.pack(fill="both", expand=True, pady=3, padx=3)
 
     def search(self):
-        for batch in batches.values():
-            print(batch.get_log())
-        print("search", self.info)
+        search_value = self.search_bar.get()
+
+        if not search_value:
+            messagebox.showerror("Existence Error", "Please enter batch ID into the searchbar")
+            return -1
+
+        if search_value not in batches:
+            messagebox.showinfo("Batch not found", "Batch ID was not found, please check ID is in format BAT-000")
+            return -1
+
+        self.parent.navigate(ConsumerBatchPage)
+        self.parent.pages[ConsumerBatchPage].update_page(search_value)  # update page
 
 
 class ConsumerBatchPage(tk.Frame):
@@ -697,6 +708,8 @@ class ConsumerBatchPage(tk.Frame):
                                     text="..."  # show ... if no other title in loaded
                                     )
         self.title_label.grid(row=1, column=1)
+
+        self.details_label = tk.Label()
 
         # __________ Page Content __________
 
