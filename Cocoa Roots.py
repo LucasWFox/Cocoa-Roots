@@ -5,7 +5,6 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 from datetime import datetime
 
-
 # lists of classes and objects
 # these associative arrays are global
 ingredients = {}
@@ -69,6 +68,29 @@ class Batch:
         messagebox.showinfo("Notification", f"New Batch Created, ID: {self.ID}")
 
     def add_ingredient(self, date_time, ingredient, amount):
+
+        if not (date_time and ingredient and amount):
+            messagebox.showerror("Existence Error", "Please complete all fields")
+            return -1
+
+        try:
+            date_time = datetime.strptime(date_time, "%d/%m/%Y")
+
+        except ValueError:
+            messagebox.showerror("Type Error", "Date must be inputted in the format DD/MM/YYYY")
+            return -1
+
+        try:
+            amount = int(amount)
+
+        except ValueError:
+            messagebox.showerror("Type Error", "Amount must be an integer")
+            return -1
+
+        if amount < 0:  # range check
+            messagebox.showerror("Range Error", "Amount cannot be less than zero")
+            return -1
+
         ingredient.reduce_amount(amount)
         self.total_weight += amount
 
@@ -87,11 +109,22 @@ class Batch:
             return -1
 
         try:
-            start_dt = datetime.strptime(start_dt, "%d-%m-%Y")
-            end_dt = datetime.strptime(end_dt, "%d-%m-%Y")
+            start_dt = datetime.strptime(start_dt, "%d/%m/%Y")
+            end_dt = datetime.strptime(end_dt, "%d/%m/%Y")
 
         except ValueError:
             messagebox.showerror("Type Error", "Date must be inputted in the format DD/MM/YYYY")
+            return -1
+
+        try:
+            amount = int(amount)
+
+        except ValueError:
+            messagebox.showerror("Type Error", "Amount must be an integer")
+            return -1
+
+        if amount < 0:  # range check
+            messagebox.showerror("Range Error", "Amount cannot be less than zero")
             return -1
 
         additive.reduce_amount(amount)
@@ -115,11 +148,18 @@ class Batch:
             return -1
 
         try:
-            start_dt = datetime.strptime(start_dt, "%d-%m-%Y")
-            end_dt = datetime.strptime(end_dt, "%d-%m-%Y")
+            start_dt = datetime.strptime(start_dt, "%d/%m/%Y")
+            end_dt = datetime.strptime(end_dt, "%d/%m/%Y")
 
         except ValueError:
             messagebox.showerror("Type Error", "Date must be inputted in the format DD/MM/YYYY")
+            return -1
+
+        try:
+            temperature = int(temperature)
+
+        except ValueError:
+            messagebox.showerror("Type Error", "Temperature must be an integer")
             return -1
 
         duration = end_dt - start_dt
@@ -128,7 +168,7 @@ class Batch:
                   "temperature": temperature,
                   "start_dt": start_dt,
                   "end_dt": end_dt,
-                  "duration": duration
+                  "duration": duration.days
                   }
 
         self.log.append(record)
@@ -140,14 +180,15 @@ class Batch:
             return -1
 
         try:
-            date_time = datetime.strptime(date_time, "%d-%m-%Y")
+            date_time = datetime.strptime(date_time, "%d/%m/%Y")
 
         except ValueError:
             messagebox.showerror("Type Error", "Date must be inputted in the format DD/MM/YYYY")
             return -1
 
         if weight_reduced > self.total_weight:  # range check
-            raise ValueError("weight reduced cannot be greater than total weight")
+            messagebox.showerror("Range Error", "Weight reduced cannot be greater than total weight")
+            return -1
 
         record = {"process": "winnowing",
                   "weight_reduced": weight_reduced,
@@ -163,14 +204,14 @@ class Batch:
             return -1
 
         try:
-            date_time = datetime.strptime(date_time, "%d-%m-%Y")
+            date_time = datetime.strptime(date_time, "%d/%m/%Y")
 
         except ValueError:
             messagebox.showerror("Type Error", "Date must be inputted in the format DD/MM/YYYY")
             return -1
 
         if fineness < 0:  # range check
-            messagebox.showerror("Type Error","Fineness cannot be less than zero")
+            messagebox.showerror("Range Error", "Fineness cannot be less than zero")
             return -1
 
         record = {"process": "grinding",
@@ -182,6 +223,24 @@ class Batch:
 
     def conching(self, date_time, temperature):
 
+        if not (date_time and temperature):
+            messagebox.showerror("Existence Error", "Please complete all fields")
+            return -1
+
+        try:
+            date_time = datetime.strptime(date_time, "%d/%m/%Y")
+
+        except ValueError:
+            messagebox.showerror("Type Error", f"Date must be inputted in the format DD/MM/YYYY")
+            return -1
+
+        try:
+            temperature = int(temperature)
+
+        except ValueError:
+            messagebox.showerror("Type Error", "Temperature must be an integer")
+            return -1
+
         record = {"process": "conching",
                   "temperature": temperature,
                   "date_time": date_time,
@@ -190,6 +249,32 @@ class Batch:
         self.log.append(record)
 
     def tempering_molding(self, date_time, melting_temp, cooling_temp, working_temp, molding_dimension, weight_per_bar):
+
+        if not (date_time and melting_temp and cooling_temp and working_temp and molding_dimension and weight_per_bar):
+            messagebox.showerror("Existence Error", "Please complete all fields")
+            return -1
+
+        try:
+            date_time = datetime.strptime(date_time, "%d/%m/%Y")
+
+        except ValueError:
+            messagebox.showerror("Type Error", "Date must be inputted in the format DD/MM/YYYY")
+            return -1
+
+        try:
+            melting_temp = int(melting_temp)
+            cooling_temp = int(cooling_temp)
+            working_temp = int(working_temp)
+            molding_dimension = int(molding_dimension)
+            weight_per_bar = int(weight_per_bar)
+
+        except ValueError:
+            messagebox.showerror("Type Error", "Temperature and weight feilds must be an integer")
+            return -1
+
+        if weight_per_bar < 0:  # range check
+            messagebox.showerror("Range Error", "Weight per bar cannot be less than zero")
+            return -1
 
         record = {"process": "tempering_molding",
                   "melting_temp": melting_temp,
@@ -203,6 +288,17 @@ class Batch:
         self.log.append(record)
 
     def finalise(self, date_time, verification_num):
+
+        if not (date_time and verification_num):
+            messagebox.showerror("Existence Error", "Please complete all fields")
+            return -1
+
+        try:
+            date_time = datetime.strptime(date_time, "%d/%m/%Y")
+
+        except ValueError:
+            messagebox.showerror("Type Error", "Date must be inputted in the format DD/MM/YYYY")
+            return -1
 
         record = {"process": "finalise",
                   "verification_num": verification_num,
@@ -228,7 +324,8 @@ class Ticket:
 
 def save(window):
     # condense data to one object to save
-    file_data = {"ingredients": ingredients, "batches": batches, "tickets": tickets}
+    file_data = {"ingredients": ingredients, "batches": batches, "tickets": tickets,
+                 "batch_ID_counter": Batch.ID_counter, "ingredient_ID_counter": Ingredient.ID_counter}
 
     with open(FILE_NAME, "wb") as file:
         pickle.dump(file_data, file)  # save data to file
@@ -241,10 +338,18 @@ def load():
     content = pickle.load(file)
 
     # if file content matches format
-    if list(content.keys()) == ["ingredients", "batches", "tickets"]:
+    if list(content.keys()) == ["ingredients", "batches", "tickets",
+                                "batch_ID_counter", "ingredient_ID_counter"]:
+
         ingredients.update(content["ingredients"])
         batches.update(content["batches"])
         tickets.update(content["tickets"])
+
+        Batch.ID_counter = content["batch_ID_counter"]
+        Ingredient.ID_counter = content["ingredient_ID_counter"]
+
+    else:
+        messagebox.showerror("Import Error", "There was an error loading content")
 
 
 # -----------------------------------------------------------------------------
