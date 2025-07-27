@@ -180,8 +180,6 @@ class Batch:
             messagebox.showerror("Range Error", "Amount cannot be less than zero")
             return -1
 
-        additive.reduce_amount(amount)
-
         #  increase ingredient amount or add ingredient to dict     V set value to 0 if additive not present
         self.__ingredients[additive] = self.__ingredients.get(additive, 0) + amount
 
@@ -190,8 +188,8 @@ class Batch:
         record = {"process": "fermentation",
                   "ingredient": additive,
                   "amount": amount,
-                  "start_dt": start_dt,
-                  "end_dt": end_dt,
+                  "start_dt": start_dt.strftime("%d/%m/%Y"),
+                  "end_dt": end_dt.strftime("%d/%m/%Y"),
                   "duration": duration.days
                   }
 
@@ -222,8 +220,8 @@ class Batch:
 
         record = {"process": "drying",
                   "temperature": temperature,
-                  "start_dt": start_dt,
-                  "end_dt": end_dt,
+                  "start_dt": start_dt.strftime("%d/%m/%Y"),
+                  "end_dt": end_dt.strftime("%d/%m/%Y"),
                   "duration": duration.days
                   }
 
@@ -373,7 +371,6 @@ class Batch:
 # GUI INTERFACE
 # -----------------------------------------------------------------------------
 
-# main tkinter setup
 class Window(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
@@ -719,7 +716,7 @@ class EditBatchPage(tk.Frame):
 
         kwargs = {}
 
-        for parameter in method_entries.keys():
+        for parameter in method_entries:
             kwargs[parameter] = method_entries[parameter].get()
 
         method_func(**kwargs)
@@ -802,6 +799,8 @@ class ConsumerPage(tk.Frame):
     def __init__(self, parent):
         tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
 
+        self.rowconfigure(2, weight=1)
+
         self.parent = parent
 
         self.search_icon = ImageTk.PhotoImage(Image.open("Resources/Search_entry.png").resize((30, 30)))
@@ -830,7 +829,7 @@ class ConsumerPage(tk.Frame):
         search_button.grid(row=1, column=2, padx=(0, 20), pady=(10, 0), ipady=3)
 
         content_frame = tk.Frame(self, bg=BLACK)  # black border frame
-        content_frame.grid(row=3, column=1, sticky="nsew", padx=10)
+        content_frame.grid(row=2, column=1, sticky="nsew", padx=10, pady=(0, 20))
 
         self.scroll_area = ScrollableBatchList(content_frame, parent, "consumer")
         self.scroll_area.pack(fill="both", expand=True, pady=3, padx=3)
@@ -855,7 +854,6 @@ class ViewBatchPage(tk.Frame):
         tk.Frame.__init__(self, parent, height=20, borderwidth=1, relief="solid")
 
         self.batch_id = ""  # current batch
-        self.log_labels = []  # logs of applied processes to show consumer
 
         self.grid_columnconfigure(1, weight=1)
 
@@ -879,7 +877,10 @@ class ViewBatchPage(tk.Frame):
                                     )
         self.title_label.grid(row=1, column=1)
 
-        self.details_label = tk.Label()
+        self.details_label = tk.Label(self, bg=DARK_BLUE, borderwidth=1, relief="solid")
+        self.details_label.grid(row=2, column=1, sticky="nsew", pady=(0, 20), padx=10)
+
+        self.details_label.columnconfigure(1, weight=1)
 
         # __________ Page Content __________
 
@@ -887,18 +888,55 @@ class ViewBatchPage(tk.Frame):
         self.batch_id = instance_id  # change page title
         self.title_label.config(text=instance_id)
 
-        for widget in self.log_labels:  # clear content before reloading
+        for widget in self.details_label.winfo_children():  # clear content before reloading
             widget.destroy()
 
-        row = 2
+        process_row = 1
         for process in batches[instance_id].get_log():  # for every action taken in batch log
-            for key in process.keys():
-                # load each action as label to show consumer
-                process_label = tk.Label(self, bg=LIGHT_BLUE, text=f"{key}: {process[key]}")
-                process_label.grid(row=row, column=1)
+            process = process.copy()
+            process_frame = tk.Frame(self.details_label,
+                                     bg=LIGHT_BLUE,
+                                     borderwidth=1,
+                                     relief="solid"
+                                     )
+            process_frame.grid(row=process_row, column=1, padx=10, pady=10, sticky="we")
 
-                self.log_labels.append(process_label)
-                row += 1
+            process_frame.columnconfigure(2, weight=1)
+
+            process_title = tk.Label(process_frame,
+                                     bg=LIGHT_ORANGE,
+                                     text=process["process"]
+                                     )
+            process_title.grid(row=1, column=1, columnspan=2, sticky="w")
+            del process["process"]
+
+            date_label = tk.Label(process_frame,
+                                  bg=LIGHT_ORANGE,
+                                  text="...",
+                                  padx=5,
+                                  )
+            date_label.grid(row=1, column=2, sticky="e", padx=5)
+
+            if "date" in process:
+                date_label.config(text=process["date"])
+                del process["date"]
+            else:
+                date_label.config(text=f"{process['start_dt']}-{process['end_dt']}")
+                del process["start_dt"]
+                del process["end_dt"]
+
+            key_row = 2
+            for key in process:
+                # load each action as label to show consumer
+                attribute_title = tk.Label(process_frame, bg=LIGHT_BLUE, text=f"{key}:")
+                attribute_title.grid(row=key_row, column=1, sticky="n")
+
+                attribute_value = tk.Label(process_frame, bg=LIGHT_BLUE, text=f"{process[key]}")
+                attribute_value.grid(row=key_row, column=2, sticky="e")
+
+                key_row += 1
+
+            process_row += 1
 
 
 class ScrollableBatchList(tk.Canvas):
