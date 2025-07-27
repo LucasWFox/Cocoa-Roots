@@ -66,14 +66,14 @@ class Batch:
 
         messagebox.showinfo("Notification", f"New Batch Created, id: {self.id}")
 
-    def add_ingredient(self, date_time, ingredient_id, amount):
+    def add_ingredient(self, date, ingredient_id, amount):
 
-        if not (date_time and ingredient_id and amount):
+        if not (date and ingredient_id and amount):
             messagebox.showerror("Existence Error", "Please complete all fields")
             return -1
 
         try:
-            date_time = datetime.strptime(date_time, "%d/%m/%Y")
+            date = datetime.strptime(date, "%d/%m/%Y")
 
         except ValueError:
             messagebox.showerror("Type Error", "Date must be inputted in the format DD/MM/YYYY")
@@ -93,9 +93,9 @@ class Batch:
         if ingredient_id not in ingredients:
             messagebox.showinfo("Not Found", "Ingredient ID was not found, please check ID is in format ING-000-AAA")
             return -1
-        
+
         ingredient = ingredients[ingredient_id]
-        
+
         #  increase ingredient amount or add ingredient to dict
         #                              set value to 0 if ingredient not present   V
         self.__ingredients[ingredient_id] = self.__ingredients.get(ingredient_id, 0) + amount
@@ -106,7 +106,7 @@ class Batch:
         record = {"process": "add_ingredient",
                   "ingredient": ingredient,
                   "amount": amount,
-                  "date_time": date_time
+                  "date": date
                   }
 
         self.__log.append(record)
@@ -185,14 +185,14 @@ class Batch:
 
         self.__log.append(record)
 
-    def winnowing(self, date_time, weight_reduced):
+    def winnowing(self, date, weight_reduced):
 
-        if not (date_time and weight_reduced):
+        if not (date and weight_reduced):
             messagebox.showerror("Existence Error", "Please complete all fields")
             return -1
 
         try:
-            date_time = datetime.strptime(date_time, "%d/%m/%Y")
+            date = datetime.strptime(date, "%d/%m/%Y")
 
         except ValueError:
             messagebox.showerror("Type Error", "Date must be inputted in the format DD/MM/YYYY")
@@ -204,19 +204,19 @@ class Batch:
 
         record = {"process": "winnowing",
                   "weight_reduced": weight_reduced,
-                  "date_time": date_time,
+                  "date": date,
                   }
 
         self.__log.append(record)
 
-    def grinding(self, date_time, fineness):  # fineness in mm
+    def grinding(self, date, fineness):  # fineness in mm
 
-        if not (date_time and fineness):
+        if not (date and fineness):
             messagebox.showerror("Existence Error", "Please complete all fields")
             return -1
 
         try:
-            date_time = datetime.strptime(date_time, "%d/%m/%Y")
+            date = datetime.strptime(date, "%d/%m/%Y")
 
         except ValueError:
             messagebox.showerror("Type Error", "Date must be inputted in the format DD/MM/YYYY")
@@ -228,19 +228,19 @@ class Batch:
 
         record = {"process": "grinding",
                   "fineness": fineness,
-                  "date_time": date_time,
+                  "date": date,
                   }
 
         self.__log.append(record)
 
-    def conching(self, date_time, temperature):
+    def conching(self, date, temperature):
 
-        if not (date_time and temperature):
+        if not (date and temperature):
             messagebox.showerror("Existence Error", "Please complete all fields")
             return -1
 
         try:
-            date_time = datetime.strptime(date_time, "%d/%m/%Y")
+            date = datetime.strptime(date, "%d/%m/%Y")
 
         except ValueError:
             messagebox.showerror("Type Error", f"Date must be inputted in the format DD/MM/YYYY")
@@ -255,19 +255,19 @@ class Batch:
 
         record = {"process": "conching",
                   "temperature": temperature,
-                  "date_time": date_time,
+                  "date": date,
                   }
 
         self.__log.append(record)
 
-    def tempering_molding(self, date_time, melting_temp, cooling_temp, working_temp, molding_dimension, weight_per_bar):
+    def tempering_molding(self, date, melting_temp, cooling_temp, working_temp, molding_dimension, weight_per_bar):
 
-        if not (date_time and melting_temp and cooling_temp and working_temp and molding_dimension and weight_per_bar):
+        if not (date and melting_temp and cooling_temp and working_temp and molding_dimension and weight_per_bar):
             messagebox.showerror("Existence Error", "Please complete all fields")
             return -1
 
         try:
-            date_time = datetime.strptime(date_time, "%d/%m/%Y")
+            date = datetime.strptime(date, "%d/%m/%Y")
 
         except ValueError:
             messagebox.showerror("Type Error", "Date must be inputted in the format DD/MM/YYYY")
@@ -294,19 +294,19 @@ class Batch:
                   "working_temp": working_temp,
                   "molding_dimension": molding_dimension,
                   "weight_per_bar": weight_per_bar,
-                  "date_time": date_time,
+                  "date": date,
                   }
 
         self.__log.append(record)
 
-    def finalise(self, date_time, verification_num):
+    def finalise(self, date, verification_num):
 
-        if not (date_time and verification_num):
+        if not (date and verification_num):
             messagebox.showerror("Existence Error", "Please complete all fields")
             return -1
 
         try:
-            date_time = datetime.strptime(date_time, "%d/%m/%Y")
+            date = datetime.strptime(date, "%d/%m/%Y")
 
         except ValueError:
             messagebox.showerror("Type Error", "Date must be inputted in the format DD/MM/YYYY")
@@ -314,7 +314,7 @@ class Batch:
 
         record = {"process": "finalise",
                   "verification_num": verification_num,
-                  "date_time": date_time,
+                  "date": date,
                   }
 
         ...  # close ... write more
@@ -382,7 +382,7 @@ class Window(tk.Tk):
         self.grid_rowconfigure(2, weight=1)
 
         style = ttk.Style()  # set ttk style (to format scroll bars)
-        style.theme_use('clam')
+        style.theme_use("clam")
 
         # titlebar
         self.title_bar = tk.Frame(height=4, bg=ORANGE)
