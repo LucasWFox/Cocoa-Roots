@@ -1057,6 +1057,7 @@ class ScrollableBatchList(tk.Canvas):
             self.grandparent.pages[ViewBatchPage].update_page(batch_id)  # update page
 
 
-window = Window()
+if __name__ == "__main__":
+    window = Window()
 
-window.mainloop()
+    window.mainloop()
