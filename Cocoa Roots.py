@@ -359,8 +359,6 @@ class Batch:
                   "date": date.strftime("%d/%m/%Y"),
                   }
 
-        ...  # close ... write more
-
         self.__log.append(record)
 
     def get_log(self):
@@ -883,6 +881,7 @@ class ViewBatchPage(tk.Frame):
         self.batch_id = ""  # current batch
 
         self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=1)
 
         # __________ Page Title __________
         title_frame = tk.Frame(self,
@@ -904,24 +903,48 @@ class ViewBatchPage(tk.Frame):
                                     )
         self.title_label.grid(row=1, column=1)
 
-        self.details_label = tk.Label(self, bg=DARK_BLUE, borderwidth=1, relief="solid")
-        self.details_label.grid(row=2, column=1, sticky="nsew", pady=(0, 20), padx=10)
-
-        self.details_label.columnconfigure(1, weight=1)
-
         # __________ Page Content __________
+        content_frame = tk.Frame(self, bg=BLACK)
+        content_frame.grid(row=2, column=1, sticky="nsew", pady=10, padx=10)
+
+        self.scroll_area = ScrollableBatchLView(content_frame)
+        self.scroll_area.pack(expand=True, pady=3, padx=3)
 
     def update_page(self, instance_id):
         self.batch_id = instance_id  # change page title
         self.title_label.config(text=instance_id)
 
-        for widget in self.details_label.winfo_children():  # clear content before reloading
+        self.scroll_area.update_page(instance_id)
+
+
+class ScrollableBatchLView(tk.Canvas):
+    def __init__(self, parent, **kwargs):
+        super().__init__(parent, bg=DARK_BLUE, **kwargs)
+
+        self.content = tk.Frame(self, bg=DARK_BLUE)  # main content area
+
+        self.content.grid_columnconfigure(1, weight=1)
+
+        # __________ Scrollbar Stuff __________
+        scroll_bar = ttk.Scrollbar(parent, orient="vertical", command=self.yview)
+        self.configure(yscrollcommand=scroll_bar.set)
+
+        scroll_bar.pack(side="right", fill="y")
+        self.pack(side="left", fill="both", expand=True)
+
+        self.window_id = self.create_window((0, 0), window=self.content, anchor="nw")
+
+        self.content.bind("<Configure>", lambda event: self.configure(scrollregion=self.bbox("all")))
+        self.bind("<Configure>", lambda event: self.itemconfig(self.window_id, width=event.width))
+
+    def update_page(self, instance_id):
+        for widget in self.content.winfo_children():  # clear content before reloading
             widget.destroy()
 
         process_row = 1
         for process in batches[instance_id].get_log():  # for every action taken in batch log
             process = process.copy()
-            process_frame = tk.Frame(self.details_label,
+            process_frame = tk.Frame(self.content,
                                      bg=LIGHT_BLUE,
                                      borderwidth=1,
                                      relief="solid"
