@@ -122,10 +122,10 @@ class Batch:
             return -1
 
         try:
-            amount = int(amount)
+            amount = float(amount)
 
         except ValueError:
-            messagebox.showerror("Type Error", "Amount must be an integer")
+            messagebox.showerror("Type Error", "Amount must be an floating point")
             return -1
 
         if amount < 0:  # range check
@@ -171,10 +171,10 @@ class Batch:
             return -1
 
         try:
-            amount = int(amount)
+            amount = float(amount)
 
         except ValueError:
-            messagebox.showerror("Type Error", "Amount must be an integer")
+            messagebox.showerror("Type Error", "Amount must be an floating point")
             return -1
 
         if amount < 0:  # range check
@@ -211,10 +211,10 @@ class Batch:
             return -1
 
         try:
-            temperature = int(temperature)
+            temperature = float(temperature)
 
         except ValueError:
-            messagebox.showerror("Type Error", "Temperature must be an integer")
+            messagebox.showerror("Type Error", "Temperature must be an floating point")
             return -1
 
         duration = end_dt - start_dt
@@ -290,10 +290,10 @@ class Batch:
             return -1
 
         try:
-            temperature = int(temperature)
+            temperature = float(temperature)
 
         except ValueError:
-            messagebox.showerror("Type Error", "Temperature must be an integer")
+            messagebox.showerror("Type Error", "Temperature must be an floating point")
             return -1
 
         record = {"process": "conching",
@@ -317,13 +317,13 @@ class Batch:
             return -1
 
         try:
-            melting_temp = int(melting_temp)
-            cooling_temp = int(cooling_temp)
-            working_temp = int(working_temp)
-            weight_per_bar = int(weight_per_bar)
+            melting_temp = float(melting_temp)
+            cooling_temp = float(cooling_temp)
+            working_temp = float(working_temp)
+            weight_per_bar = float(weight_per_bar)
 
         except ValueError:
-            messagebox.showerror("Type Error", "Temperature and weight feilds must be an integer")
+            messagebox.showerror("Type Error", "Temperature and weight feilds must be an floating point")
             return -1
 
         if weight_per_bar < 0:  # range check
