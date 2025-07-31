@@ -148,7 +148,7 @@ class Batch:
 
         ingredient = ingredients[ingredient_id]
 
-        e = ingredient.reduce_amount(amount)
+        e = ingredient.reduce_amount(amount)  # e variable checking for error
         if e == -1:  # if error
             return -1
 
@@ -772,14 +772,17 @@ class ScrollableBatchFunctions(tk.Canvas):
         self.bind("<Configure>", lambda event: self.itemconfig(self.window_id, width=event.width))
 
         # __________ Content Stuff __________
-        self.batch_methods = [method for method in dir(Batch)
-                              if method[:2] != "__"
-                              and method not in ["id_counter", "get_log"]
-                              ]
+        self.batch_methods = [method for method in dir(Batch)  # get Batch methods
+                              if method[:2] != "__"  # not including  double underscore methods
+                              and method not in ["id_counter", "get_log"]  # and not including non-callable attributes
+                              ]                                            # or getter methods
 
         method_row = 2
         for method_str in self.batch_methods:
-            method_func = getattr(Batch, method_str)
+            method_func = getattr(Batch, method_str)  # gat callable method from method name
+
+            # get list of function parameters to fill, slice list so parameters with co_argcount so only relevant
+            # parameters show not including *args, **kwargs or self
             parameters = list(method_func.__code__.co_varnames[:method_func.__code__.co_argcount])
             parameters.remove("self")
 
@@ -806,6 +809,7 @@ class ScrollableBatchFunctions(tk.Canvas):
                                       )
             submit_button.grid(row=1, column=4, sticky="e", padx=5)
 
+            # if control structure used to add button to one iteration of a for loop
             if method_str == "add_ingredient":
                 self.notification_text = ("ID                               Weight\n"
                                           "----------------------------------------")
@@ -837,7 +841,7 @@ class ScrollableBatchFunctions(tk.Canvas):
             method_row += 1
 
     def submit(self, method_str):
-        e = self.parent.alter_batch(method_str)
+        e = self.parent.alter_batch(method_str)  # e variable checking for error
         if not e == -1:
             for widget in self.parent.method_entries[method_str].values():
                 widget.delete(0, tk.END)  # clear text from affected entries
