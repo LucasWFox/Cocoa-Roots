@@ -13,7 +13,7 @@ batches = {}
 FILE_NAME = "data.pkl"
 
 # global colours
-BLACK = "#000000"
+BLACK = "#000000"  # string
 RED = "#B3152A"
 ORANGE = "#F6A482"
 DARK_ORANGE = "#ED652D"
@@ -36,7 +36,7 @@ def save():
     with open(FILE_NAME, "wb") as file:
         pickle.dump(file_data, file)  # save data to file
 
-    window.destroy()
+    window.destroy()  # close window
 
 
 def load():
@@ -67,8 +67,10 @@ def load():
 # -----------------------------------------------------------------------------
 
 class Ingredient:
-    id_counter = {}
+    id_counter = {}  # associative array counter, keys will be 3 character ingredient codes, key_values will be int
 
+    # data comes from create_ingredient method of IngredientPage class, submitted by the user to the GUI
+    # name: str, weight: float, source: str
     def __init__(self, name, weight, source):
         code = name[:3].upper()
         code_counter = Ingredient.id_counter.get(code, 1)
@@ -78,11 +80,14 @@ class Ingredient:
 
         self.name = name  # common name of batch
         self.weight = weight
-        self.source = source  # name of ingredient suppler
+        self.__source = source  # name of ingredient suppler, private information
 
+    # data comes from add_ingredient method of Batch class
+    # amount: float
     def reduce_amount(self, amount):
         calc_weight = self.weight - amount
 
+        # if-elif-else control structure used for validation of data
         if calc_weight > 0:  # range check
             self.weight = calc_weight
             return 1
@@ -96,11 +101,11 @@ class Ingredient:
 
 
 class Batch:
-    id_counter = 1
+    id_counter = 1  # int counter
 
     def __init__(self):
         self.__log = []  # list of every event occurred in batch
-        self.__total_weight = 0
+        self.__total_weight = 0  # batch data private
         self.__ingredients = {}
 
         self.id = f"BAT-{Batch.id_counter:03d}"  # Batch unique identifier
@@ -108,6 +113,11 @@ class Batch:
 
         messagebox.showinfo("Notification", f"New Batch Created, id: {self.id}")
 
+    # __________ Batch Methods __________
+    # the data for these methods comes from alter_batch method from EditBatchPage class
+    # submitted by the user to the GUI
+
+    # date: str, ingredient_id: str (as it contains both characters and numerals), amount: float
     def add_ingredient(self, date, ingredient_id, amount):
 
         if not (date and ingredient_id and amount):
@@ -156,6 +166,8 @@ class Batch:
 
         self.__log.append(record)
 
+    # start_dt: datetime, end_dt: datetime, additive: str,
+    # amount: float (amount is float for more precise measurement than int)
     def fermentation(self, start_dt, end_dt, additive, amount):
 
         if not (start_dt and end_dt and additive and amount):
@@ -196,6 +208,8 @@ class Batch:
 
         self.__log.append(record)
 
+    # start_dt: datetime, end_dt: datetime, additive: str,
+    # temperature: float (temperature is float for more precise measurement than int)
     def drying(self, start_dt, end_dt, temperature):
 
         if not (start_dt and end_dt and temperature):
@@ -228,6 +242,7 @@ class Batch:
 
         self.__log.append(record)
 
+    # date: datetime, weight_reduced: float
     def winnowing(self, date, weight_reduced):
 
         if not (date and weight_reduced):
@@ -252,6 +267,7 @@ class Batch:
 
         self.__log.append(record)
 
+    # date: datetime, fineness: float
     def grinding(self, date, fineness):  # fineness in mm
 
         if not (date and fineness):
@@ -276,6 +292,7 @@ class Batch:
 
         self.__log.append(record)
 
+    # date: datetime, temperature: float
     def conching(self, date, temperature):
 
         if not (date and temperature):
@@ -303,6 +320,8 @@ class Batch:
 
         self.__log.append(record)
 
+    # date: datetime, melting_temp: float, cooling_temp: float, working_temp: float, molding_dimension: str (string
+    # used as molding dimensions include multiple numeric values and other shape descriptions), weight_per_bar: float
     def tempering_molding(self, date, melting_temp, cooling_temp, working_temp, molding_dimension, weight_per_bar):
 
         if not (date and melting_temp and cooling_temp and working_temp and molding_dimension and weight_per_bar):
@@ -341,6 +360,8 @@ class Batch:
 
         self.__log.append(record)
 
+    # date: datetime, verification_num: str (str used for verification_num as it does not need to
+    # undergo numeric operations and may contain non-numeric characters)
     def finalise(self, date, verification_num):
 
         if not (date and verification_num):
@@ -361,6 +382,7 @@ class Batch:
 
         self.__log.append(record)
 
+    # log getter
     def get_log(self):
         return self.__log
 
@@ -424,6 +446,7 @@ class Content(tk.Frame):
 
         self.pages = {}  # dictionary of sub-frames within content
 
+        # use of for loop control structure to minimise repetition in code
         for page in [UserPage, WorkerPage, ConsumerPage, IngredientPage,
                      EditBatchPage, ViewBatchPage]:  # for every page within content
             page_class = page(parent=self)  # create frame class
@@ -631,11 +654,11 @@ class IngredientPage(tk.Frame):
                                 bg=LIGHT_ORANGE,
                                 borderwidth=1,
                                 relief="solid",
-                                command=lambda: self.create_ingredient()
+                                command=lambda: self.add_ingredient()
                                 )
         back_button.grid(column=1, row=4, pady=20, padx=10)
 
-    def create_ingredient(self):
+    def add_ingredient(self):
         name = self.name_entry.get()
         weight = self.weight_entry.get()
         source = self.source_entry.get()
@@ -708,6 +731,8 @@ class EditBatchPage(tk.Frame):
 
         self.scroll_area.notification_text = ("ID                               Weight\n"
                                               "----------------------------------------")
+
+        # for loop control structure used to apply procces to variable amount of ingredients
         for ingredient in ingredients.values():
             self.scroll_area.notification_text += f"\n{ingredient.id}:             {ingredient.weight}"
 
@@ -749,7 +774,7 @@ class ScrollableBatchFunctions(tk.Canvas):
         # __________ Content Stuff __________
         self.batch_methods = [method for method in dir(Batch)
                               if method[:2] != "__"
-                              and not method == "id_counter"
+                              and method not in ["id_counter", "get_log"]
                               ]
 
         method_row = 2
@@ -1048,6 +1073,7 @@ class ScrollableBatchList(tk.Canvas):
 
     def navigate_batch(self, batch_id):
 
+        # if-elif control structure used for checking user type
         if self.user_type == "worker":  # if scroll area in user section of GUI
             self.grandparent.navigate(EditBatchPage)
             self.grandparent.pages[EditBatchPage].update_page(batch_id)  # update page
