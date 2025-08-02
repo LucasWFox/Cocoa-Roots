@@ -395,10 +395,6 @@ class Window(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
 
-        # Call save function on closing tkinter window
-        self.protocol("WM_DELETE_WINDOW", lambda: save())
-        load()  # load file content
-
         self.logo = ImageTk.PhotoImage(Image.open("Resources/Bean_Logo.png"))
 
         # adjust window features
@@ -1088,6 +1084,12 @@ class ScrollableBatchList(tk.Canvas):
 
 
 if __name__ == "__main__":
+    # call load function
+    load()
+
     window = Window()
+
+    # Call save function on closing tkinter window
+    window.protocol("WM_DELETE_WINDOW", lambda: save())
 
     window.mainloop()
