@@ -142,6 +142,10 @@ class Batch:
             messagebox.showerror("Range Error", "Amount cannot be less than zero")
             return -1
 
+        # print(ingredient_id)
+        ingredient_id = ingredient_id.upper()
+        # print(ingredient_id)
+
         if ingredient_id not in ingredients:
             messagebox.showinfo("Not Found", "Ingredient ID was not found, please check ID is in format ING-000-AAA")
             return -1
@@ -680,6 +684,11 @@ class IngredientPage(tk.Frame):
 
         messagebox.showinfo("Notification", f"New Ingredient Added, id: {instance_id}")
 
+        # print(f"list of ingredients:")
+
+        # for key, key_value in ingredients.items():
+        #     print(f"{key}: {key_value}")
+
 
 class EditBatchPage(tk.Frame):
     def __init__(self, parent):
@@ -885,7 +894,7 @@ class ConsumerPage(tk.Frame):
         self.scroll_area.pack(fill="both", expand=True, pady=3, padx=3)
 
     def search(self):
-        search_value = self.search_bar.get()
+        search_value = self.search_bar.get().upper()
 
         if not search_value:
             messagebox.showerror("Existence Error", "Please enter batch id into the searchbar")
